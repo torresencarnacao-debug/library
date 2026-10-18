@@ -952,9 +952,7 @@ Menu.Data.Options.Troll = {
         [4] = { -- All Tab
             { type = "separator", label = "Mass Trolls" },
             { type = "toggle", name = "Launch All", state = "launchAllActive" },
-            { type = "toggle", name = "Kill All", state = "killAllActive" },
-            { type = "toggle", name = "Hard Kill All", state = "hardKillAllActive" },
-            { type = "toggle", name = "Kill All PNJ", state = "killAllPnjActive" },
+            { type = "selector", name = "Kill All", options = {"Kill All", "Hard Kill All", "Kill All PNJ"}, valueIdx = 1, id = "kill_all_selector" },
             { type = "separator", label = "Vehicles" },
             { type = "toggle", name = "Unlock All Vehicles", state = "unlockAllVehicleActive" },
             { type = "toggle", name = "Broke All", state = "brokeAllActive" },
@@ -3681,7 +3679,16 @@ function Menu.Actions.RenderMenu()
             elseif type(data) == "table" and data.type == "selector" then
                 -- Universal rule for ALL menus: if it's a selector, show the badge
                 label = data.name
-                badgeOverride = tostring(data.options[data.valueIdx] or "None")
+                if data.id == "kill_all_selector" then
+                    local idx = data.valueIdx or 1
+                    local names = {"Kill All", "Hard Kill All", "Kill All PNJ"}
+                    local states = {"killAllActive", "hardKillAllActive", "killAllPnjActive"}
+                    local isOn = Menu.State[states[idx]]
+                    local arrow = idx > 1 and ("< " .. names[idx] .. " >") or ("< " .. names[idx] .. " >")
+                    badgeOverride = (isOn and "[ON] " or "") .. names[idx]
+                else
+                    badgeOverride = "< " .. tostring(data.options[data.valueIdx] or "None") .. " >"
+                end
             elseif type(data) == "table" and data.type == "wardrobe_item" then
                 -- Wardrobe parts: Name on left, value on right
                 label = data.name
