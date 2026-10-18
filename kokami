@@ -3,8 +3,8 @@
 -- =========================================================================
 Menu = {
     Colors = {
-        HeaderPink = { r = 220, g = 220, b = 220 }, -- Global White Identity
-        SelectedBg = { r = 220, g = 220, b = 220, a = 0.8 }
+        HeaderPink = { r = 0, g = 95, b = 215 }, -- Mirage Blue Identity
+        SelectedBg = { r = 0, g = 95, b = 215, a = 0.9 }
     },
     State = {},
     Settings = {
@@ -551,19 +551,36 @@ function RenderBindingUI()
     sh = (sh and sh > 0) and sh or 1080
     local cx, cy = sw / 2, sh / 2
     local padding = 28
-    -- Couleur accent adaptee a la banniere (MIRAGE breathing si MirageLua)
+
+    -- Récupération position souris + état clic
+    local mx, my = -1, -1
+    if Susano and type(Susano.GetMousePos) == "function" then
+        local gx, gy = Susano.GetMousePos()
+        if gx and gy and gx > 0 then mx, my = gx, gy end
+    end
+    if (mx < 0 or my < 0) and GetNuiCursorPosition then
+        local nx, ny = GetNuiCursorPosition()
+        if nx and ny then mx, my = nx * sw, ny * sh end
+    end
+    local clickDown = (Susano and Susano.GetAsyncKeyState and Susano.GetAsyncKeyState(0x01)) or false
+    local justClicked = clickDown and not _G._prevBindingUIClick
+    _G._prevBindingUIClick = clickDown
+
+    -- Couleur accent adaptée à la bannière (Bleu Mirage STRICT pendant bind et auth)
     local accentR, accentG, accentB
-    if _G.IsMirageLuaActive and _G.IsMirageLuaActive() and _G.MirageBreathColor then
+    if isFirstLoadBinding or (_G.AuthState and _G.AuthState.active) then
+        accentR, accentG, accentB = 0.0, 95.0/255.0, 215.0/255.0
+    elseif _G.IsMirageLuaActive and _G.IsMirageLuaActive() and _G.MirageBreathColor then
         local _cr, _cg, _cb = _G.MirageBreathColor(GetGameTimer())
         accentR, accentG, accentB = _cr/255.0, _cg/255.0, _cb/255.0
     else
-        local _themeRGB = Menu.Colors and Menu.Colors.HeaderPink or {r=255,g=255,b=255}
-        accentR = (_themeRGB.r or 255) / 255.0
-        accentG = (_themeRGB.g or 255) / 255.0
-        accentB = (_themeRGB.b or 255) / 255.0
+        local _themeRGB = Menu.Colors and Menu.Colors.HeaderPink or {r=0,g=95,b=215}
+        accentR = (_themeRGB.r or 0) / 255.0
+        accentG = (_themeRGB.g or 95) / 255.0
+        accentB = (_themeRGB.b or 215) / 255.0
     end
     if (accentR + accentG + accentB) < 0.3 then
-        accentR, accentG, accentB = 1.0, 1.0, 1.0
+        accentR, accentG, accentB = 0.0, 95.0/255.0, 215.0/255.0
     end
 
     -- ── CUSTOM KEYBOARD INPUT FOR CONFIG PROFILES ──────────────────────
@@ -730,192 +747,241 @@ function RenderBindingUI()
     end
     -- ── FIN ECRAN PED INPUT ──────────────────────────────────────────────────
 
-    -- ── ECRAN KEYBINDER (touche d'ouverture) ─────────────────────────
+    -- ── ECRAN KEYBINDER COMPACT & PRO (Touche d'ouverture) ──────────────────
     if isFirstLoadBinding then
-        local title  = "INITIALISATION"
-        local sub    = "Choisissez votre touche d'ouverture du menu"
-        local keyTxt = "Touche : " .. (startupBindingName or "F12")
-        local hint   = "ENTREE Confirmer  |  ECHAP Garder F12"
+        local cardW, cardH = 460, 142
+        local cardX = cx - cardW / 2
+        local cardY = cy - cardH / 2
 
-        local thumbTex  = _G._loadingTex or _G._bannerTex
-        local thumbSize = thumbTex and 72.0 or 0.0
-        local thumbPad  = thumbTex and 14.0 or 0.0
+        -- Halo subtil & bordure
+        Susano.DrawRectFilled(cardX - 4, cardY - 4, cardW + 8, cardH + 8, 0.0, 0.0, 0.0, 0.40, 16.0)
+        Susano.DrawRectFilled(cardX - 1, cardY - 1, cardW + 2, cardH + 2, 0.12, 0.20, 0.35, 0.75, 13.0)
+        Susano.DrawRectFilled(cardX, cardY, cardW, cardH, 0.06, 0.07, 0.09, 0.98, 12.0)
 
-        local uiW = 480
-        local uiH = thumbSize + thumbPad + 110
-        local x = cx - uiW / 2
-        local y = cy - uiH / 2
-
-        Menu.Helpers.DrawHollowBorderRect(x, y, uiW, uiH, accentR, accentG, accentB, 0.8, 0.82, 8.0)
-
-        -- Miniature centrÃ©e en haut dans la box
-        if thumbTex and Susano.DrawImage then
-            local tx = cx - thumbSize / 2
-            local ty = y + thumbPad
-            Susano.DrawImage(thumbTex, tx, ty, thumbSize, thumbSize, 1, 1, 1, 1, 8.0, 0, 0, 1, 1)
+        -- Header : Logo + MIRAGE
+        local logoTex = _G._loadingTex or _G._bannerTex
+        if logoTex and Susano.DrawImage then
+            Susano.DrawImage(logoTex, cardX + 22, cardY + 18, 18, 18, 1, 1, 1, 1, 4.0, 0, 0, 1, 1)
+        else
+            Susano.DrawRectFilled(cardX + 22, cardY + 18, 18, 18, 0.0, 95.0/255.0, 215.0/255.0, 1.0, 4.0)
         end
+        Susano.DrawText(cardX + 48, cardY + 17, "MIRAGE", 16, 1.0, 1.0, 1.0, 1.0)
 
-        local off = thumbSize + thumbPad  -- dÃ©calage vertical pour les textes
-        local function ct(txt, size, yOff, r, g, b, a)
-            local tw = Susano.GetTextWidth(txt, size)
-            Susano.DrawText(cx - tw / 2, y + off + yOff, txt, size, r, g, b, a or 1)
+        -- Sous-titre
+        Susano.DrawText(cardX + 22, cardY + 46, "Appuyez sur la touche qui l'ouvre", 14, 0.70, 0.74, 0.80, 0.95)
+
+        -- Champ de saisie touche (gauche)
+        local inX, inY, inW, inH = cardX + 22, cardY + 76, 296, 44
+        Susano.DrawRectFilled(inX - 1, inY - 1, inW + 2, inH + 2, 0.0, 95.0/255.0, 215.0/255.0, 0.65, 9.0)
+        Susano.DrawRectFilled(inX, inY, inW, inH, 0.08, 0.09, 0.12, 0.98, 8.0)
+        local keyName = (startupBindingName and startupBindingName ~= "") and startupBindingName or "F12"
+        Susano.DrawText(inX + 16, inY + (inH - 16) / 2, keyName, 16, 1.0, 1.0, 1.0, 1.0)
+
+        -- Bouton TERMINÉ (droite)
+        local btnX, btnY, btnW, btnH = cardX + 22 + 296 + 12, cardY + 76, 108, 44
+        local isHover = (mx >= btnX and mx <= btnX + btnW and my >= btnY and my <= btnY + btnH)
+        if isHover then
+            Susano.DrawRectFilled(btnX, btnY, btnW, btnH, 0.05, 115.0/255.0, 240.0/255.0, 1.0, 8.0)
+        else
+            Susano.DrawRectFilled(btnX, btnY, btnW, btnH, 0.0, 95.0/255.0, 215.0/255.0, 1.0, 8.0)
         end
+        local tw = Susano.GetTextWidth("TERMINÉ", 14)
+        Susano.DrawText(btnX + (btnW - tw) / 2, btnY + (btnH - 14) / 2, "TERMINÉ", 14, 1.0, 1.0, 1.0, 1.0)
 
-        ct(title,  22, 10,  1,    1,    1,    1)
-        ct(sub,    14, 36,  0.65, 0.65, 0.65, 1)
-        ct(keyTxt, 18, 62,  accentR, accentG, accentB, 1)
-        ct(hint,   12, 90,  0.4,  0.4,  0.4,  1)
+        if isHover and justClicked then
+            _G._bindingDoneClicked = true
+            PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+        end
         return
     end
 
-    -- â”€â”€ ECRAN AUTH (saisie du code) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    -- ── ECRAN AUTHENTIFICATION COMPACT & PRO ─────────────────────────────────
     if _G.AuthState.active then
         local now = GetGameTimer()
 
-        local thumbTex  = _G._loadingTex or _G._bannerTex
-        local thumbSize = thumbTex and 72.0 or 0.0
-        local thumbPad  = thumbTex and 14.0 or 0.0
-
-        -- â”€â”€ MODE CONFIRMATION (IP auto-dÃ©tectÃ©e) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        -- ── MODE CONFIRMATION IP AUTO-DETECTEE ──
         if _G.AuthState.confirmMode then
-            local uiW = 440
-            local uiH = thumbSize + thumbPad + 170
-            local x = cx - uiW / 2
-            local y = cy - uiH / 2
+            local cardW, cardH = 480, 154
+            local cardX = cx - cardW / 2
+            local cardY = cy - cardH / 2
 
-            Menu.Helpers.DrawHollowBorderRect(x, y, uiW, uiH, accentR, accentG, accentB, 0.8, 0.82, 10.0)
+            Susano.DrawRectFilled(cardX - 4, cardY - 4, cardW + 8, cardH + 8, 0.0, 0.0, 0.0, 0.40, 16.0)
+            Susano.DrawRectFilled(cardX - 1, cardY - 1, cardW + 2, cardH + 2, 0.12, 0.20, 0.35, 0.75, 13.0)
+            Susano.DrawRectFilled(cardX, cardY, cardW, cardH, 0.06, 0.07, 0.09, 0.98, 12.0)
 
-            if thumbTex and Susano.DrawImage then
-                Susano.DrawImage(thumbTex, cx - thumbSize / 2, y + thumbPad, thumbSize, thumbSize, 1, 1, 1, 1, 8.0, 0, 0, 1, 1)
+            local logoTex = _G._loadingTex or _G._bannerTex
+            if logoTex and Susano.DrawImage then
+                Susano.DrawImage(logoTex, cardX + 22, cardY + 18, 18, 18, 1, 1, 1, 1, 4.0, 0, 0, 1, 1)
+            else
+                Susano.DrawRectFilled(cardX + 22, cardY + 18, 18, 18, 0.0, 95.0/255.0, 215.0/255.0, 1.0, 4.0)
             end
+            Susano.DrawText(cardX + 48, cardY + 17, "MIRAGE", 16, 1.0, 1.0, 1.0, 1.0)
 
-            local off = thumbSize + thumbPad
-            local function ct(txt, size, yOff, r, g, b, a)
-                local tw = Susano.GetTextWidth(txt, size)
-                Susano.DrawText(cx - tw / 2, y + off + yOff, txt, size, r, g, b, a or 1)
-            end
+            local nameDisplay = (_G.AuthState.confirmName and _G.AuthState.confirmName ~= "") and _G.AuthState.confirmName or "Inconnu"
+            Susano.DrawText(cardX + 22, cardY + 46, "IP reconnue : " .. nameDisplay .. "  —  confirmer ?", 14, 0.70, 0.74, 0.80, 0.95)
 
-            ct("CONNEXION AUTOMATIQUE", 22, 10, 1, 1, 1, 1)
-            ct("IP reconnue â€” est-ce bien toi ?", 14, 36, 0.6, 0.6, 0.6, 1)
+            -- Boutons : Confirmer (gauche) / Changer (droite)
+            local btnW, btnH = 208, 44
+            local b1x = cardX + 22
+            local b2x = cardX + 22 + btnW + 20
+            local bY  = cardY + 76
 
-            -- Nom Rockstar liÃ©
-            local nameDisplay = _G.AuthState.confirmName ~= "" and _G.AuthState.confirmName or "Inconnu"
-            ct(nameDisplay, 22, 58, accentR, accentG, accentB, 1)
-
-            -- Deux boutons : Confirmer (gauche) / Changer (droite)
-            local btnW, btnH = 160, 34
-            local gap = 14
-            local totalBtns = btnW * 2 + gap
-            local b1x = cx - totalBtns / 2
-            local b2x = b1x + btnW + gap
-            local bY  = y + off + 90
-
+            local hover1 = (mx >= b1x and mx <= b1x + btnW and my >= bY and my <= bY + btnH)
+            local hover2 = (mx >= b2x and mx <= b2x + btnW and my >= bY and my <= bY + btnH)
             local sel = _G.AuthState.confirmBtn or 1
-            -- Bouton 1 : Confirmer
-            local r1, g1, b1a = sel == 1 and accentR or 0.18, sel == 1 and accentG or 0.18, sel == 1 and accentB or 0.18
-            Susano.DrawRectFilled(b1x, bY, btnW, btnH, r1, g1, b1a, sel == 1 and 0.9 or 0.5, 6.0)
-            local t1w = Susano.GetTextWidth("CONFIRMER", 16)
-            Susano.DrawText(b1x + (btnW - t1w) / 2, bY + (btnH - 16) / 2, "CONFIRMER", 16, 1, 1, 1, 1)
 
-            -- Bouton 2 : Changer
-            local r2, g2, b2a = sel == 2 and 0.8 or 0.18, sel == 2 and 0.25 or 0.18, sel == 2 and 0.25 or 0.18
-            Susano.DrawRectFilled(b2x, bY, btnW, btnH, r2, g2, b2a, sel == 2 and 0.9 or 0.5, 6.0)
-            local t2w = Susano.GetTextWidth("CHANGER DE CODE", 16)
-            Susano.DrawText(b2x + (btnW - t2w) / 2, bY + (btnH - 16) / 2, "CHANGER DE CODE", 16, 1, 1, 1, 1)
+            if hover1 or sel == 1 then
+                Susano.DrawRectFilled(b1x, bY, btnW, btnH, 0.05, 115.0/255.0, 240.0/255.0, 1.0, 8.0)
+            else
+                Susano.DrawRectFilled(b1x, bY, btnW, btnH, 0.0, 95.0/255.0, 215.0/255.0, 0.85, 8.0)
+            end
+            local t1w = Susano.GetTextWidth("CONFIRMER", 14)
+            Susano.DrawText(b1x + (btnW - t1w) / 2, bY + (btnH - 14) / 2, "CONFIRMER", 14, 1, 1, 1, 1)
 
-            -- Hint navigation
-            ct("GAUCHE/DROITE Naviguer  |  ENTREE Valider", 12, 136, 0.35, 0.35, 0.35, 1)
+            if hover2 or sel == 2 then
+                Susano.DrawRectFilled(b2x, bY, btnW, btnH, 0.25, 0.28, 0.35, 1.0, 8.0)
+            else
+                Susano.DrawRectFilled(b2x, bY, btnW, btnH, 0.14, 0.16, 0.20, 0.9, 8.0)
+            end
+            local t2w = Susano.GetTextWidth("CHANGER DE CLÉ", 14)
+            Susano.DrawText(b2x + (btnW - t2w) / 2, bY + (btnH - 14) / 2, "CHANGER DE CLÉ", 14, 0.85, 0.85, 0.85, 1)
+
+            if hover1 and justClicked then
+                _G._authConfirmBtn1Clicked = true
+                PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+            elseif hover2 and justClicked then
+                _G._authConfirmBtn2Clicked = true
+                PlaySoundFrontend(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+            end
             return
         end
 
-        -- â”€â”€ MODE SAISIE NORMAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        -- ── MODE SAISIE NORMAL ──
+        local cardW, cardH = 480, 154
+        local cardX = cx - cardW / 2
+        local cardY = cy - cardH / 2
+
+        Susano.DrawRectFilled(cardX - 4, cardY - 4, cardW + 8, cardH + 8, 0.0, 0.0, 0.0, 0.40, 16.0)
+        Susano.DrawRectFilled(cardX - 1, cardY - 1, cardW + 2, cardH + 2, 0.12, 0.20, 0.35, 0.75, 13.0)
+        Susano.DrawRectFilled(cardX, cardY, cardW, cardH, 0.06, 0.07, 0.09, 0.98, 12.0)
+
+        -- Header : Logo + MIRAGE
+        local logoTex = _G._loadingTex or _G._bannerTex
+        if logoTex and Susano.DrawImage then
+            Susano.DrawImage(logoTex, cardX + 22, cardY + 18, 18, 18, 1, 1, 1, 1, 4.0, 0, 0, 1, 1)
+        else
+            Susano.DrawRectFilled(cardX + 22, cardY + 18, 18, 18, 0.0, 95.0/255.0, 215.0/255.0, 1.0, 4.0)
+        end
+        Susano.DrawText(cardX + 48, cardY + 17, "MIRAGE", 16, 1.0, 1.0, 1.0, 1.0)
+
+        -- Sous-titre
+        Susano.DrawText(cardX + 22, cardY + 46, "Entrez votre clé d'authentification", 14, 0.70, 0.74, 0.80, 0.95)
+
+        -- Action Row : Input (266px) + Bouton Coller 📋 (44px) + Bouton TERMINÉ (110px) = 436px
+        local inX, inY, inW, inH = cardX + 22, cardY + 74, 266, 44
+        Susano.DrawRectFilled(inX - 1, inY - 1, inW + 2, inH + 2, 0.0, 95.0/255.0, 215.0/255.0, 0.65, 9.0)
+        Susano.DrawRectFilled(inX, inY, inW, inH, 0.08, 0.09, 0.12, 0.98, 8.0)
+
         local buf = _G.AuthState.inputBuffer or ""
         local showCursor = ((now % 1000) < 500)
-        local masked = string.rep("*", #buf) .. (showCursor and "|" or " ")
-
-        local uiW = 420
-        local uiH = thumbSize + thumbPad + 160
-        local x = cx - uiW / 2
-        local y = cy - uiH / 2
-
-        Menu.Helpers.DrawHollowBorderRect(x, y, uiW, uiH, accentR, accentG, accentB, 0.8, 0.82, 10.0)
-
-        if thumbTex and Susano.DrawImage then
-            Susano.DrawImage(thumbTex, cx - thumbSize / 2, y + thumbPad, thumbSize, thumbSize, 1, 1, 1, 1, 8.0, 0, 0, 1, 1)
-        end
-
-        local off = thumbSize + thumbPad
-        local function ct(txt, size, yOff, r, g, b, a)
-            local tw = Susano.GetTextWidth(txt, size)
-            Susano.DrawText(cx - tw / 2, y + off + yOff, txt, size, r, g, b, a or 1)
-        end
-
-        ct("AUTHENTIFICATION",           22, 10,  1,    1,    1,    1)
-        ct("Entrez votre code d'acces",  14, 36,  0.55, 0.55, 0.55, 1)
-
-        local fieldW, fieldH = 260, 32
-        local fx = cx - fieldW / 2
-        local fy = y + off + 56
-        Susano.DrawRectFilled(fx, fy, fieldW, fieldH, accentR * 0.22, accentG * 0.22, accentB * 0.22, 0.95, 5.0)
-        Susano.DrawRectFilled(fx, fy + fieldH - 2, fieldW, 2, accentR, accentG, accentB, 0.95, 0.0)
-        local mw = Susano.GetTextWidth(masked, 20)
-        Susano.DrawText(cx - mw / 2, fy + 7, masked, 20, 1, 1, 1, 1)
-
-        if _G.AuthState.errorMsg ~= "" and now < _G.AuthState.errorTimer then
-            ct(_G.AuthState.errorMsg, 14, 100, 1, 0.3, 0.3, 1)
+        if #buf == 0 then
+            Susano.DrawText(inX + 16, inY + (inH - 14) / 2, "Entrez votre clé...", 14, 0.40, 0.45, 0.52, 0.8)
+            if showCursor then
+                Susano.DrawText(inX + 16, inY + (inH - 16) / 2, "|", 16, 0.0, 95.0/255.0, 215.0/255.0, 0.9)
+            end
         else
-            ct("ENTREE Valider  |  RETOUR Effacer", 12, 100, 0.35, 0.35, 0.35, 1)
+            local disp = buf .. (showCursor and "|" or " ")
+            Susano.DrawText(inX + 16, inY + (inH - 15) / 2, disp, 15, 1.0, 1.0, 1.0, 1.0)
         end
 
-        -- Bouton CTRL+V Coller
-        local btnW, btnH = 130, 26
-        local bx = cx - btnW / 2
-        local by = y + off + 116
-        Susano.DrawRectFilled(bx, by, btnW, btnH, accentR * 0.28, accentG * 0.28, accentB * 0.28, 0.95, 5.0)
-        Susano.DrawRectFilled(bx, by + btnH - 2, btnW, 2, accentR, accentG, accentB, 0.95, 0.0)
-        local btnTxt = "CTRL+V  Coller"
-        local btw = Susano.GetTextWidth(btnTxt, 14)
-        Susano.DrawText(cx - btw / 2, by + (btnH - 14) / 2, btnTxt, 14, 1.0, 1.0, 1.0, 1.0)
+        -- Bouton Coller avec UNIQUEMENT l'émoticone 📋 (pas de texte "Coller")
+        local pasteX, pasteY, pasteW, pasteH = cardX + 22 + 266 + 8, cardY + 74, 44, 44
+        local isPasteHover = (mx >= pasteX and mx <= pasteX + pasteW and my >= pasteY and my <= pasteY + pasteH)
+        if isPasteHover then
+            Susano.DrawRectFilled(pasteX - 1, pasteY - 1, pasteW + 2, pasteH + 2, 0.0, 120.0/255.0, 240.0/255.0, 0.85, 9.0)
+            Susano.DrawRectFilled(pasteX, pasteY, pasteW, pasteH, 0.12, 0.16, 0.24, 0.98, 8.0)
+        else
+            Susano.DrawRectFilled(pasteX - 1, pasteY - 1, pasteW + 2, pasteH + 2, 0.15, 0.22, 0.35, 0.65, 9.0)
+            Susano.DrawRectFilled(pasteX, pasteY, pasteW, pasteH, 0.09, 0.11, 0.15, 0.98, 8.0)
+        end
+        local emW = Susano.GetTextWidth and Susano.GetTextWidth("📋", 18)
+        if emW and emW > 4 then
+            Susano.DrawText(pasteX + (pasteW - emW)/2, pasteY + (pasteH - 18)/2, "📋", 18, 1, 1, 1, 1)
+        else
+            local iconX = pasteX + (pasteW - 14) / 2
+            local iconY = pasteY + (pasteH - 18) / 2
+            Susano.DrawRectFilled(iconX, iconY + 3, 14, 15, 0.45, 0.50, 0.60, 0.9, 2.0)
+            Susano.DrawRectFilled(iconX + 2, iconY + 5, 10, 11, 0.92, 0.92, 0.95, 1.0, 1.0)
+            Susano.DrawRectFilled(iconX + 4, iconY, 6, 4, 0.25, 0.30, 0.40, 1.0, 1.0)
+            Susano.DrawRectFilled(iconX + 5, iconY + 1, 4, 2, 0.09, 0.11, 0.15, 1.0, 0.0)
+        end
+
+        if isPasteHover and justClicked then
+            _G._authPasteClicked = true
+            if _G.DoAuthPaste then pcall(_G.DoAuthPaste) end
+            PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+        end
+
+        -- Bouton TERMINÉ (Validation)
+        local btnX, btnY, btnW, btnH = cardX + 22 + 266 + 8 + 44 + 8, cardY + 74, 110, 44
+        local isDoneHover = (mx >= btnX and mx <= btnX + btnW and my >= btnY and my <= btnY + btnH)
+        if isDoneHover then
+            Susano.DrawRectFilled(btnX, btnY, btnW, btnH, 0.05, 115.0/255.0, 240.0/255.0, 1.0, 8.0)
+        else
+            Susano.DrawRectFilled(btnX, btnY, btnW, btnH, 0.0, 95.0/255.0, 215.0/255.0, 1.0, 8.0)
+        end
+        local tw = Susano.GetTextWidth("TERMINÉ", 14)
+        Susano.DrawText(btnX + (btnW - tw) / 2, btnY + (btnH - 14) / 2, "TERMINÉ", 14, 1.0, 1.0, 1.0, 1.0)
+
+        if isDoneHover and justClicked then
+            _G._authDoneClicked = true
+            PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
+        end
+
+        -- Ligne d'erreur ou d'aide en bas
+        if _G.AuthState.errorMsg and _G.AuthState.errorMsg ~= "" and now < _G.AuthState.errorTimer then
+            local ew = Susano.GetTextWidth(_G.AuthState.errorMsg, 13)
+            Susano.DrawText(cx - ew / 2, cardY + 128, _G.AuthState.errorMsg, 13, 1.0, 0.35, 0.35, 1.0)
+        else
+            local hw = Susano.GetTextWidth("ENTREE Valider  |  CLIQUEZ 📋 ou CTRL+V Coller", 12)
+            Susano.DrawText(cx - hw / 2, cardY + 128, "ENTREE Valider  |  CLIQUEZ 📋 ou CTRL+V Coller", 12, 0.40, 0.44, 0.50, 0.85)
+        end
         return
     end
 
-    -- â”€â”€ ECRAN KEYBIND DYNAMIQUE F12 (bind d'options) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    -- ── ECRAN KEYBIND DYNAMIQUE F12 (bind d'options) ─────────────────────────
     if isBindingNoclip then
-        local title   = bindingActionData and bindingActionData.label or "Option"
-        local sub     = bindingText or "Appuyez sur une touche"
-        local keyDisp = bindingKeyDisplay ~= "" and ("Touche : " .. bindingKeyDisplay) or ""
-        local hint    = "ENTREE Sauver  |  RETOUR Effacer  |  ECHAP Annuler"
+        local cardW, cardH = 460, 142
+        local cardX = cx - cardW / 2
+        local cardY = cy - cardH / 2
 
-        local thumbTex  = _G._loadingTex or _G._bannerTex
-        local thumbSize = thumbTex and 72.0 or 0.0
-        local thumbPad  = thumbTex and 14.0 or 0.0
+        Susano.DrawRectFilled(cardX - 4, cardY - 4, cardW + 8, cardH + 8, 0.0, 0.0, 0.0, 0.40, 16.0)
+        Susano.DrawRectFilled(cardX - 1, cardY - 1, cardW + 2, cardH + 2, 0.12, 0.20, 0.35, 0.75, 13.0)
+        Susano.DrawRectFilled(cardX, cardY, cardW, cardH, 0.06, 0.07, 0.09, 0.98, 12.0)
 
-        local uiW = 480
-        local uiH = thumbSize + thumbPad + 110
-        local x = cx - uiW / 2
-        local y = cy - uiH / 2
-
-        Menu.Helpers.DrawHollowBorderRect(x, y, uiW, uiH, accentR, accentG, accentB, 0.8, 0.82, 8.0)
-
-        -- Miniature centrÃ©e en haut dans la box
-        if thumbTex and Susano.DrawImage then
-            local tx = cx - thumbSize / 2
-            local ty = y + thumbPad
-            Susano.DrawImage(thumbTex, tx, ty, thumbSize, thumbSize, 1, 1, 1, 1, 8.0, 0, 0, 1, 1)
+        local logoTex = _G._loadingTex or _G._bannerTex
+        if logoTex and Susano.DrawImage then
+            Susano.DrawImage(logoTex, cardX + 22, cardY + 18, 18, 18, 1, 1, 1, 1, 4.0, 0, 0, 1, 1)
+        else
+            Susano.DrawRectFilled(cardX + 22, cardY + 18, 18, 18, accentR, accentG, accentB, 1.0, 4.0)
         end
+        local title = bindingActionData and bindingActionData.label or "Option"
+        Susano.DrawText(cardX + 48, cardY + 17, "BIND : " .. title, 16, 1.0, 1.0, 1.0, 1.0)
 
-        local off = thumbSize + thumbPad
-        local function ct(txt, size, yOff, r, g, b, a)
-            local tw = Susano.GetTextWidth(txt, size)
-            Susano.DrawText(cx - tw / 2, y + off + yOff, txt, size, r, g, b, a or 1)
-        end
+        local sub = bindingText or "Appuyez sur une touche pour assigner"
+        Susano.DrawText(cardX + 22, cardY + 46, sub, 14, 0.70, 0.74, 0.80, 0.95)
 
-        ct("BIND : " .. title, 22, 10,  1,    1,    1,    1)
-        ct(sub,               14, 36,  0.65, 0.65, 0.65, 1)
-        if keyDisp ~= "" then
-            ct(keyDisp, 18, 62, accentR, accentG, accentB, 1)
-        end
-        ct(hint, 12, 90, 0.4, 0.4, 0.4, 1)
+        local inX, inY, inW, inH = cardX + 22, cardY + 76, 296, 44
+        Susano.DrawRectFilled(inX - 1, inY - 1, inW + 2, inH + 2, accentR, accentG, accentB, 0.65, 9.0)
+        Susano.DrawRectFilled(inX, inY, inW, inH, 0.08, 0.09, 0.12, 0.98, 8.0)
+        local keyText = bindingKeyDisplay ~= "" and bindingKeyDisplay or "Aucune"
+        Susano.DrawText(inX + 16, inY + (inH - 16) / 2, keyText, 16, 1.0, 1.0, 1.0, 1.0)
+
+        local btnX, btnY, btnW, btnH = cardX + 22 + 296 + 12, cardY + 76, 108, 44
+        Susano.DrawRectFilled(btnX, btnY, btnW, btnH, accentR, accentG, accentB, 1.0, 8.0)
+        local tw = Susano.GetTextWidth("TERMINÉ", 14)
+        Susano.DrawText(btnX + (btnW - tw) / 2, btnY + (btnH - 14) / 2, "TERMINÉ", 14, 1.0, 1.0, 1.0, 1.0)
+        return
     end
 end
 
@@ -2052,16 +2118,24 @@ local function _applyThemeJson(themeStr)
     end
 
     -- Couleur : utiliser tonumber pour eviter le piege r=0 falsy
-    local tr = tonumber(t.r)
-    local tg = tonumber(t.g)
-    local tb = tonumber(t.b)
-    if tr ~= nil and tg ~= nil and tb ~= nil then
-        Menu.Colors.HeaderPink = { r = math.floor(tr), g = math.floor(tg), b = math.floor(tb) }
-        Menu.Colors.SelectedBg = { r = math.floor(tr), g = math.floor(tg), b = math.floor(tb), a = 0.9 }
-        _G.customThemeLoaded = true
-    elseif t.theme and type(t.theme) == "string" then
-        Menu.ApplyTheme(t.theme)
-        _G.customThemeLoaded = true
+    local curB = Menu.AvailableBanners and Menu.AvailableBanners[Menu.BannerIndex]
+    local isMirageCur = (curB and curB.name == "Mirage")
+    if isMirageCur then
+        Menu.Colors.HeaderPink = { r = 0, g = 95, b = 215 }
+        Menu.Colors.SelectedBg = { r = 0, g = 95, b = 215, a = 0.9 }
+        _G.customThemeLoaded = false
+    else
+        local tr = tonumber(t.r)
+        local tg = tonumber(t.g)
+        local tb = tonumber(t.b)
+        if tr ~= nil and tg ~= nil and tb ~= nil then
+            Menu.Colors.HeaderPink = { r = math.floor(tr), g = math.floor(tg), b = math.floor(tb) }
+            Menu.Colors.SelectedBg = { r = math.floor(tr), g = math.floor(tg), b = math.floor(tb), a = 0.9 }
+            _G.customThemeLoaded = true
+        elseif t.theme and type(t.theme) == "string" then
+            Menu.ApplyTheme(t.theme)
+            _G.customThemeLoaded = true
+        end
     end
 
     -- Titre et options
@@ -2181,11 +2255,21 @@ _G.BannerThemeMap = {
 
 -- Appliquer automatiquement le thème lié à la bannière active
 function Menu.ApplyBannerTheme(bannerName)
+    if bannerName == "Mirage" then
+        Menu.Colors.HeaderPink = { r = 0, g = 95, b = 215 }
+        Menu.Colors.SelectedBg = { r = 0, g = 95, b = 215, a = 0.9 }
+        for idx, name in ipairs(Menu.AvailableThemes) do
+            if name == "Mirage" then Menu.ThemeIndex = idx; break end
+        end
+        _G.bannerUV = nil
+        return
+    end
+
     if bannerName == "Perso" then
         local loaded = Menu.LoadLocalTheme()
         if loaded then return end
     end
-    -- Si un thème personnalisé a été chargé via le dashboard, ne pas l'écraser
+    -- Si un thème personnalisé a été chargé via le dashboard, ne pas l'écraser (sauf pour Mirage)
     if _G.customThemeLoaded and Menu.Colors and Menu.Colors.SelectedBg then
         return
     end
@@ -2459,6 +2543,12 @@ function Menu.LoadNotifIconForBanner(bannerName)
 end
 
 function Menu.ApplyTheme(themeName)
+    local curB = Menu.AvailableBanners and Menu.AvailableBanners[Menu.BannerIndex]
+    if curB and curB.name == "Mirage" then
+        Menu.Colors.HeaderPink = { r = 0, g = 95, b = 215 }
+        Menu.Colors.SelectedBg = { r = 0, g = 95, b = 215, a = 0.9 }
+        return
+    end
     if themeName == "Mirage" or themeName == "ElectricBlue" or themeName == "Electric Blue" then
         Menu.Colors.HeaderPink = { r = 0, g = 95, b = 215 }
         Menu.Colors.SelectedBg = { r = 0, g = 95, b = 215, a = 0.9 }
@@ -2566,17 +2656,15 @@ Citizen.CreateThread(function()
         setProgress(targetP)
     end
 
+    -- Démarrage STRICTEMENT avec la bannière et le thème Mirage (Bleu)
     local activeIdx = 1
     for i, b in ipairs(Menu.AvailableBanners) do
-        if b.name == "Perso" then activeIdx = i; break end
+        if b.name == "Mirage" then activeIdx = i; break end
     end
     Menu.BannerIndex = activeIdx
     Menu.Banner.imageUrl = Menu.AvailableBanners[activeIdx].url
-
-    if not Menu.LoadLocalTheme() then
-        Menu.ApplyTheme("Mirage")
-        for idx, name in ipairs(Menu.AvailableThemes) do if name == "Mirage" then Menu.ThemeIndex = idx; break end end
-    end
+    Menu.ApplyTheme("Mirage")
+    for idx, name in ipairs(Menu.AvailableThemes) do if name == "Mirage" then Menu.ThemeIndex = idx; break end end
 
     -- Telechargements asynchrones en tache de fond (zéro freeze !)
     Citizen.CreateThread(function()
@@ -2711,9 +2799,8 @@ function Menu.RenderLoadingScreen()
     local vigY = cy - vigH / 2
     local vigRounding = 18.0
 
-    -- Couleur theme
-    local rgb = Menu.Colors.HeaderPink or {r=255, g=255, b=255}
-    local tr, tg, tb = rgb.r/255.0, rgb.g/255.0, rgb.b/255.0
+    -- Couleur theme : Bleu Mirage garanti pendant le chargement
+    local tr, tg, tb = 0.0, 95.0/255.0, 215.0/255.0
 
     -- Fond interieur noir pur
     Susano.DrawRectFilled(vigX, vigY, vigW, vigH, 0.0, 0.0, 0.0, 1.0, vigRounding)
@@ -3041,35 +3128,37 @@ function Menu.Actions.RenderMenu()
     end
 
     -- ── OVERLAY TITRE MIRAGE / DASHBOARD ──
-    -- Affiché dès que non masqué et non baked
-    if Susano and Susano.DrawText and not _G.customBannerHideTitle and not _G.customBannerBaked then
-        local bannerTitle = _G.customBannerTitle or "MIRAGE"
+    -- Rendu professionnel et calibré : pas de barre noire sur Mirage, badge flottant élégant si titre custom
+    local curBanner = Menu.AvailableBanners and Menu.AvailableBanners[Menu.BannerIndex]
+    local curBannerName = curBanner and curBanner.name or ""
+    local hasCustomTitle = _G.customBannerTitle and _G.customBannerTitle ~= "" and _G.customBannerTitle ~= "MIRAGE"
+    if Susano and Susano.DrawText and not _G.customBannerHideTitle and not _G.customBannerBaked and hasCustomTitle and curBannerName ~= "Mirage" then
+        local bannerTitle = _G.customBannerTitle
         local bannerFont = tonumber(_G.customBannerFont) or 0
-        local titleFontSize = math.floor(14 * menuScale)
-        local titlePaddingX = math.floor(10 * menuScale)
-        local titleY = y_px + h_px - math.floor(22 * menuScale)
+        local titleFontSize = math.floor(13 * menuScale)
         local dotSize = math.floor(5 * menuScale)
-        local dotX = x_px + titlePaddingX
-        local dotY = titleY + math.floor(4 * menuScale)
+        local textW = Susano.GetTextWidth(bannerTitle, titleFontSize)
+        local badgeW = textW + dotSize + math.floor(18 * menuScale)
+        local badgeH = math.floor(22 * menuScale)
+        local badgeX = x_px + math.floor(10 * menuScale)
+        local badgeY = y_px + h_px - badgeH - math.floor(6 * menuScale)
 
-        -- 1. Gradient sombre de bas de bannière pour garantir un contraste parfait quelle que soit l'image
-        Susano.DrawRectFilled(x_px, y_px + h_px - math.floor(26 * menuScale), w_px, math.floor(26 * menuScale), 0, 0, 0, 0.55, 0)
+        -- Badge compact et moderne au lieu d'une barre noire qui coupe toute la bannière
+        Susano.DrawRectFilled(badgeX, badgeY, badgeW, badgeH, 0.05, 0.06, 0.08, 0.82, 6.0)
+        Susano.DrawRectFilled(badgeX - 1, badgeY - 1, badgeW + 2, badgeH + 2, sideR, sideG, sideB, 0.50, 7.0)
 
-        -- 2. Pastille lumineuse aux couleurs du thème actif
         local dotPulse = 0.75 + 0.25 * math.sin(GetGameTimer() / 350.0)
+        local dotX = badgeX + math.floor(8 * menuScale)
+        local dotY = badgeY + (badgeH - dotSize) / 2
         Susano.DrawRectFilled(dotX, dotY, dotSize, dotSize, sideR, sideG, sideB, 0.95 * dotPulse, dotSize / 2)
 
-        -- 3. Ombre portée et texte du titre (Mirage ou nom personnalisé avec fonte personnalisable)
         local textStartX = dotX + dotSize + math.floor(6 * menuScale)
-        -- Ombre noire nette
-        Susano.DrawText(textStartX + 1, titleY + 1, bannerTitle, titleFontSize, 0.0, 0.0, 0.0, 0.95, bannerFont)
-        -- Texte éclatant
-        Susano.DrawText(textStartX, titleY, bannerTitle, titleFontSize, 0.96, 0.96, 0.96, 1.0, bannerFont)
+        Susano.DrawText(textStartX, badgeY + (badgeH - titleFontSize) / 2, bannerTitle, titleFontSize, 0.96, 0.96, 0.96, 1.0, bannerFont)
     end
 
-    -- Separateur fin entre banniere et titlebar
+    -- Separateur fin et élégant entre banniere et titlebar
     if Susano and Susano.DrawRectFilled then
-        Susano.DrawRectFilled(x_px, y_px + h_px, w_px, 1, 1, 1, 1, 0.08, 0)
+        Susano.DrawRectFilled(x_px, y_px + h_px, w_px, 1, sideR, sideG, sideB, 0.40, 0)
     end
 
     -- Draw Subtitle/Tab Bar (collÃ© directement sous la banniere, meme fond)
