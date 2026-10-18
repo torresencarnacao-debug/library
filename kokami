@@ -12,7 +12,16 @@ Menu = {
         fastNavDelay = 150
     },
     Data = {
-        Options = {}
+        Options = {
+            Main = {
+                "Player",
+                "Online Menu",
+                "Visual",
+                "Combat",
+                "Weapon",
+                "Vehicle",
+            }
+        }
     },
     Actions = {},
     Helpers = {},
@@ -92,6 +101,7 @@ Menu.State = {
     attachCarNetId  = nil,
     killAllActive = false,
     hardKillAllActive = false,
+    killAllPnjActive = false,
     unlockAllVehicleActive = false,
     noReloadActive = false,
     infiniteAmmoActive = false,
@@ -249,6 +259,50 @@ function Menu.Helpers.GetFullListForMenu(menu)
     end
     return {}
 end
+
+function Menu.Helpers.GetKeybindOptions()
+    local options = {}
+    local binds = _G.UniversalKeyBinds or {}
+    local list = {}
+    for k, v in pairs(binds) do
+        table.insert(list, { key = k, bind = v })
+    end
+    table.sort(list, function(a, b) return (a.bind.label or "") < (b.bind.label or "") end)
+
+    for _, entry in ipairs(list) do
+        local keyName = Menu.Helpers.GetKeyName(entry.bind.vk, entry.key)
+        local label = (entry.bind.label or "Action") .. " : " .. keyName
+        local savedIdx = (_G.KeybindSelectorState and _G.KeybindSelectorState[entry.key]) or 1
+        table.insert(options, {
+            type = "bind_entry",
+            label = label,
+            id = "bind_action",
+            bindKey = entry.key,
+            bindData = entry.bind,
+            options = { "Changer", "Supprimer" },
+            valueIdx = savedIdx
+        })
+    end
+    return options
+end
+
+function Menu.Helpers.GetCurrentMenuList()
+    local menu = (Menu.State and Menu.State.currentMenu) or "MAIN"
+    local list = {}
+    if menu == "MAIN" then list = (Menu.Data and Menu.Data.Options and Menu.Data.Options.Main) or {}
+    elseif menu == "PLAYER" then list = Menu.Helpers.GetPlayerOptions and Menu.Helpers.GetPlayerOptions() or {}
+    elseif menu == "MOVEMENT" then list = Menu.Helpers.GetMovementOptions and Menu.Helpers.GetMovementOptions() or {}
+    elseif menu == "ONLINE" then list = Menu.Helpers.GetOnlineMenuList and Menu.Helpers.GetOnlineMenuList() or {}
+    elseif menu == "TROLL" then list = (Menu.Data and Menu.Data.Options and Menu.Data.Options.Troll and Menu.Data.Options.Troll.Categories and Menu.Data.Options.Troll.Categories[Menu.State.trollTab]) or {}
+    elseif menu == "COMBAT" then list = (Menu.Data and Menu.Data.Options and Menu.Data.Options.Combat and Menu.Data.Options.Combat.Categories and Menu.Data.Options.Combat.Categories[Menu.State.combatTab]) or {}
+    elseif menu == "VEHICLE" then
+        if Menu.State.vehicleTab == 1 then list = Menu.Helpers.GetVehicleMenuList and Menu.Helpers.GetVehicleMenuList() or {}
+        else list = (Menu.Data and Menu.Data.Options and Menu.Data.Options.Vehicle and Menu.Data.Options.Vehicle.Categories and Menu.Data.Options.Vehicle.Categories[Menu.State.vehicleTab]) or {} end
+    elseif menu == "KEYBINDS" then list = Menu.Helpers.GetKeybindOptions()
+    elseif menu == "ACTIVE_BINDS" then list = Menu.Helpers.GetActiveBindsOptions and Menu.Helpers.GetActiveBindsOptions() or {}
+    else list = (Menu.Data and Menu.Data.Options and Menu.Data.Options[menu]) or {} end
+    return list
+end
 local function IsBlockingUIActive()
     return isFirstLoadBinding
         or (_G.AuthState and _G.AuthState.active)
@@ -260,6 +314,31 @@ local function IsBlockingUIActive()
 end
 
 _G.IsBlockingUIActive = IsBlockingUIActive
+
+-- Dedicated control blocking & re-enabling thread
+CreateThread(function()
+    while true do
+        Wait(0)
+        if IsBlockingUIActive() then
+            DisableAllControlActions(0)
+            DisableAllControlActions(1)
+            DisableAllControlActions(2)
+            HideHelpTextThisFrame()
+
+            if Menu.State.menuOpen or _G.isBindingNoclip then
+                EnableControlAction(0, 172, true) -- Haut
+                EnableControlAction(0, 173, true) -- Bas
+                EnableControlAction(0, 174, true) -- Gauche
+                EnableControlAction(0, 175, true) -- Droite
+                EnableControlAction(0, 191, true) -- Entrée
+                EnableControlAction(0, 194, true) -- Retour
+                EnableControlAction(0, 51,  true) -- Tab onglets
+                EnableControlAction(0, 1,   true) -- Souris H
+                EnableControlAction(0, 2,   true) -- Souris V
+            end
+        end
+    end
+end)
 
 function Menu.Actions.ToggleDynastyMenu()
     if not _G.AuthDone then return end
@@ -392,7 +471,8 @@ _G.ControlNamesMap = {
     [311] = "K", [312] = "I", [313] = "O", [314] = "H"
 }
 
-local AK_DIST = 1.0
+_G.AK_DIST = 1.0
+local AK_DIST = _G.AK_DIST
 
 Menu.Data = {
     Options = {
@@ -458,14 +538,17 @@ local _authVKtoChar = {
     [0x65]="5",[0x66]="6",[0x67]="7",[0x68]="8",[0x69]="9",
 }
 local _authVKPrev = {}
+_G._authVKtoChar = _authVKtoChar
+_G._authVKPrev = _authVKPrev
 
 function RenderBindingUI()
     -- Bloquer l'affichage tant que les deux loadings ne sont pas termines
-    if Menu.State.isLoading then return end
-    if Menu.State.showLoading then return end
+    if Menu.State.isLoading or Menu.State.showLoading then return end
     if not Susano or not Susano.DrawRectFilled or not Susano.GetTextWidth then return end
 
     local sw, sh = GetActiveScreenResolution()
+    sw = (sw and sw > 0) and sw or 1920
+    sh = (sh and sh > 0) and sh or 1080
     local cx, cy = sw / 2, sh / 2
     local padding = 28
     -- Couleur accent adaptee a la banniere (MIRAGE breathing si MirageLua)
@@ -871,6 +954,7 @@ Menu.Data.Options.Troll = {
             { type = "toggle", name = "Launch All", state = "launchAllActive" },
             { type = "toggle", name = "Kill All", state = "killAllActive" },
             { type = "toggle", name = "Hard Kill All", state = "hardKillAllActive" },
+            { type = "toggle", name = "Kill All PNJ", state = "killAllPnjActive" },
             { type = "separator", label = "Vehicles" },
             { type = "toggle", name = "Unlock All Vehicles", state = "unlockAllVehicleActive" },
             { type = "toggle", name = "Broke All", state = "brokeAllActive" },
@@ -885,7 +969,7 @@ Menu.Data.Options.Wardrobe = {
 }
 
 -- Community Outfits Data
-local CommunityOutfits = {
+_G.CommunityOutfits = {
     {
         name = "Alkaida",
         components = {
@@ -1081,8 +1165,11 @@ local CommunityOutfits = {
         }
     }
 }
-local selectedOutfitIndex = 1
-local miragePewPewSelectedIdx = 1  -- persistant comme selectedOutfitIndex
+local CommunityOutfits = _G.CommunityOutfits
+_G.selectedOutfitIndex = 1
+local selectedOutfitIndex = _G.selectedOutfitIndex
+_G.miragePewPewSelectedIdx = 1
+local miragePewPewSelectedIdx = _G.miragePewPewSelectedIdx
 
 local dynastyNotifications = {}
 
@@ -1587,13 +1674,13 @@ end
 
 function DrawFreecamHint()
     if not freecam_active or Menu.State.freecamInfoVisible == false then
-        if type(Susano.BeginFrame) == "function" then Susano.BeginFrame() end
-        if type(Susano.SubmitFrame) == "function" then Susano.SubmitFrame() end
         return
     end
-    if type(Susano.BeginFrame) ~= "function" or type(Susano.DrawText) ~= "function" or type(Susano.SubmitFrame) ~= "function" then return end
-    Susano.BeginFrame()
+    if not Susano or type(Susano.DrawText) ~= "function" then return end
+    local FreecamOptions = _G.FreecamOptions or { "Launch", "Teleport", "Shoot Vision", "Spawn Props Model", "NPC Hijack", "Ragdoll", "Attach", "Warp", "TP Passenger", "Physgun", "Delete Entity", "Launch Vehicle", "Bug Vehicle", "Black Hole", "Magneto", "Massacre Player" }
     local w, h = GetActiveScreenResolution()
+    w = (w and w > 0) and w or 1920
+    h = (h and h > 0) and h or 1080
     local cx = w / 2.0
     local cy = h / 2.0
     local resScale = h / 1080.0
@@ -1754,7 +1841,6 @@ function DrawFreecamHint()
     else
         Susano.DrawText(badgeX, badgeY, counterStr, cFontSize, 0.95, 0.95, 0.95, 1.0)
     end
-    Susano.SubmitFrame()
 end
 
 -- Banner Texture State
@@ -2613,6 +2699,8 @@ function Menu.RenderLoadingScreen()
     if not Susano or not Susano.DrawRectFilled or not Susano.DrawText or not Susano.GetTextWidth then return end
 
     local sw, sh = GetActiveScreenResolution()
+    sw = (sw and sw > 0) and sw or 1920
+    sh = (sh and sh > 0) and sh or 1080
     local cx, cy = sw / 2, sh / 2
     local resScale = Menu.Cache.resScale or 1.0
     local progressValue = math.floor(Menu.State.loadingProgress or 0)
@@ -2744,12 +2832,10 @@ function Menu.RenderLoadingScreen()
 end
 
 function Menu.Actions.RenderMenu()
-    if Menu.State.isLoading then
+    if Menu.State.isLoading or Menu.State.showLoading then
         Menu.RenderLoadingScreen()
         return
     end
-    -- Bloquer aussi pendant le loading secondaire (showLoading)
-    if Menu.State.showLoading then return end
 
     if isFirstLoadBinding then return end
     if not Menu.State.menuOpen and Menu.State.menuAlpha <= 0 then return end
@@ -2828,7 +2914,7 @@ function Menu.Actions.RenderMenu()
     local sideB = (Menu.Colors.SelectedBg and Menu.Colors.SelectedBg.b or 211) / 255
 
     -- Safety check: Identify Content List EARLY
-    local fullList = Menu.Data.Options.Main
+    local fullList = (Menu.Data and Menu.Data.Options and Menu.Data.Options.Main) or {}
     if Menu.State.currentMenu == "PLAYER" then fullList = Menu.Helpers.GetPlayerOptions()
     elseif Menu.State.currentMenu == "MOVEMENT" then fullList = Menu.Helpers.GetMovementOptions()
     elseif Menu.State.currentMenu == "ONLINE" then
@@ -4461,7 +4547,7 @@ function Menu.Actions.HandleNavigationUp()
     if currentTime - Menu.State.lastNavTime < navDelay then return end
     Menu.State.lastNavTime = currentTime
 
-    local list = Menu.Data.Options.Main
+    local list = (Menu.Data and Menu.Data.Options and Menu.Data.Options.Main) or {}
     if Menu.State.currentMenu == "PLAYER" then list = Menu.Helpers.GetPlayerOptions()
     elseif Menu.State.currentMenu == "MOVEMENT" then list = Menu.Helpers.GetMovementOptions()
     elseif Menu.State.currentMenu == "ONLINE" then list = Menu.Helpers.GetOnlineMenuList()
@@ -4531,7 +4617,7 @@ function Menu.Actions.HandleNavigationDown()
     if currentTime - Menu.State.lastNavTime < navDelay then return end
     Menu.State.lastNavTime = currentTime
 
-    local list = Menu.Data.Options.Main
+    local list = (Menu.Data and Menu.Data.Options and Menu.Data.Options.Main) or {}
     if Menu.State.currentMenu == "PLAYER" then list = Menu.Helpers.GetPlayerOptions()
     elseif Menu.State.currentMenu == "MOVEMENT" then list = Menu.Helpers.GetMovementOptions()
     elseif Menu.State.currentMenu == "ONLINE" then list = Menu.Helpers.GetOnlineMenuList()
@@ -4997,6 +5083,18 @@ CreateThread(function()
             DisableAllControlActions(1)
             DisableAllControlActions(2)
             HideHelpTextThisFrame()
+
+            if Menu.State.menuOpen or _G.isBindingNoclip then
+                EnableControlAction(0, 172, true) -- Haut
+                EnableControlAction(0, 173, true) -- Bas
+                EnableControlAction(0, 174, true) -- Gauche
+                EnableControlAction(0, 175, true) -- Droite
+                EnableControlAction(0, 191, true) -- Entrée
+                EnableControlAction(0, 194, true) -- Retour
+                EnableControlAction(0, 51,  true) -- Tab onglets
+                EnableControlAction(0, 1,   true) -- Souris H
+                EnableControlAction(0, 2,   true) -- Souris V
+            end
         end
 
         -- Wrap rendering in pcalls to prevent crashes from killing the entire script
