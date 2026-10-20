@@ -95,6 +95,7 @@ Menu.State = {
     hardLaunchActive = false,
     launchAllActive = false,
     launchAllSoloActive = false,
+    fuckAllCarsActive = false,
     protectActive = false,
     brokeAllActive = false,
     attachCarActive = false,
@@ -973,10 +974,11 @@ Menu.Data.Options.Troll = {
         },
         [4] = { -- All Tab
             { type = "separator", label = "Mass Trolls" },
-            { type = "toggle", name = "Launch All", state = "launchAllActive" },
-            { type = "toggle", name = "Launch All Solo", state = "launchAllSoloActive" },
+            { type = "selector", name = "Launch All", options = {"Normal", "Solo"}, valueIdx = 1, id = "launch_all_selector" },
+
             { type = "selector", name = "Kill All", options = {"Kill All", "Hard Kill All", "Kill All PNJ"}, valueIdx = 1, id = "kill_all_selector" },
             { type = "separator", label = "Vehicles" },
+            { type = "toggle", name = "Fuck All Cars", state = "fuckAllCarsActive" },
             { type = "toggle", name = "Unlock All Vehicles", state = "unlockAllVehicleActive" },
             { type = "toggle", name = "Broke All", state = "brokeAllActive" },
         }
@@ -3732,6 +3734,12 @@ function Menu.Actions.RenderMenu()
                     local states = {"killAllActive", "hardKillAllActive", "killAllPnjActive"}
                     local isOn = Menu.State[states[idx]]
                     local arrow = idx > 1 and ("< " .. names[idx] .. " >") or ("< " .. names[idx] .. " >")
+                    badgeOverride = (isOn and "[ON] " or "") .. names[idx]
+                elseif data.id == "launch_all_selector" then
+                    local idx = data.valueIdx or 1
+                    local names = {"Normal", "Solo"}
+                    local states = {"launchAllActive", "launchAllSoloActive"}
+                    local isOn = Menu.State[states[idx]]
                     badgeOverride = (isOn and "[ON] " or "") .. names[idx]
                 else
                     badgeOverride = "< " .. tostring(data.options[data.valueIdx] or "None") .. " >"
