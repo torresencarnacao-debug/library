@@ -94,6 +94,7 @@ Menu.State = {
     settingsTab = 1,
     hardLaunchActive = false,
     launchAllActive = false,
+    launchAllSoloActive = false,
     protectActive = false,
     brokeAllActive = false,
     attachCarActive = false,
@@ -765,8 +766,6 @@ function RenderBindingUI()
         Susano.DrawRectFilled(x, y, w, h, 0.045, 0.052, 0.070, 1.0, rad)
         -- reflet léger en haut
         Susano.DrawRectFilled(x + 1, y + 1, w - 2, h * 0.42, 1, 1, 1, 0.025, rad)
-        -- liseré accent en haut
-        Susano.DrawRectFilled(x + rad, y + 1, w - rad * 2, 2, accentR, accentG, accentB, 0.85, 0.0)
     end
 
     local function drawHeader(x, y, title, subtitle)
@@ -975,6 +974,7 @@ Menu.Data.Options.Troll = {
         [4] = { -- All Tab
             { type = "separator", label = "Mass Trolls" },
             { type = "toggle", name = "Launch All", state = "launchAllActive" },
+            { type = "toggle", name = "Launch All Solo", state = "launchAllSoloActive" },
             { type = "selector", name = "Kill All", options = {"Kill All", "Hard Kill All", "Kill All PNJ"}, valueIdx = 1, id = "kill_all_selector" },
             { type = "separator", label = "Vehicles" },
             { type = "toggle", name = "Unlock All Vehicles", state = "unlockAllVehicleActive" },
