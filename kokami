@@ -747,47 +747,79 @@ function RenderBindingUI()
     end
     -- ── FIN ECRAN PED INPUT ──────────────────────────────────────────────────
 
-    -- ── ECRAN KEYBINDER COMPACT & PRO (Touche d'ouverture) ──────────────────
-    if isFirstLoadBinding then
-        local cardW, cardH = 460, 142
-        local cardX = cx - cardW / 2
-        local cardY = cy - cardH / 2
+    -- ── CARTES BIND / AUTH : compactes, logo agrandi, bordure soignée ──────────
+    local CARD_W = 400
+    local PAD    = 18
 
-        -- Halo subtil & bordure
-        Susano.DrawRectFilled(cardX - 4, cardY - 4, cardW + 8, cardH + 8, 0.0, 0.0, 0.0, 0.40, 16.0)
-        Susano.DrawRectFilled(cardX - 1, cardY - 1, cardW + 2, cardH + 2, 0.12, 0.20, 0.35, 0.75, 13.0)
-        Susano.DrawRectFilled(cardX, cardY, cardW, cardH, 0.06, 0.07, 0.09, 0.98, 12.0)
+    local function drawCard(x, y, w, h)
+        local rad = 12.0
+        -- ombre douce multi-couches
+        for i = 4, 1, -1 do
+            Susano.DrawRectFilled(x - i * 2, y - i * 2, w + i * 4, h + i * 4, 0, 0, 0, 0.09, rad + i * 2)
+        end
+        -- halo couleur accent
+        Susano.DrawRectFilled(x - 3, y - 3, w + 6, h + 6, accentR, accentG, accentB, 0.14, rad + 3)
+        -- bordure accent nette
+        Susano.DrawRectFilled(x - 1.5, y - 1.5, w + 3, h + 3, accentR, accentG, accentB, 0.95, rad + 1.5)
+        -- fond
+        Susano.DrawRectFilled(x, y, w, h, 0.045, 0.052, 0.070, 1.0, rad)
+        -- reflet léger en haut
+        Susano.DrawRectFilled(x + 1, y + 1, w - 2, h * 0.42, 1, 1, 1, 0.025, rad)
+        -- liseré accent en haut
+        Susano.DrawRectFilled(x + rad, y + 1, w - rad * 2, 2, accentR, accentG, accentB, 0.85, 0.0)
+    end
 
-        -- Header : Logo + MIRAGE
+    local function drawHeader(x, y, title, subtitle)
+        local logoS = 44
+        local lx, ly = x + PAD, y + 16
+        -- anneau accent autour du logo
+        Susano.DrawRectFilled(lx - 2, ly - 2, logoS + 4, logoS + 4, accentR, accentG, accentB, 0.60, 13.0)
+        Susano.DrawRectFilled(lx - 1, ly - 1, logoS + 2, logoS + 2, 0.045, 0.052, 0.070, 1.0, 12.0)
         local logoTex = _G._loadingTex or _G._bannerTex
         if logoTex and Susano.DrawImage then
-            Susano.DrawImage(logoTex, cardX + 22, cardY + 18, 18, 18, 1, 1, 1, 1, 4.0, 0, 0, 1, 1)
+            Susano.DrawImage(logoTex, lx, ly, logoS, logoS, 1, 1, 1, 1, 10.0, 0, 0, 1, 1)
         else
-            Susano.DrawRectFilled(cardX + 22, cardY + 18, 18, 18, 0.0, 95.0/255.0, 215.0/255.0, 1.0, 4.0)
+            Susano.DrawRectFilled(lx, ly, logoS, logoS, accentR, accentG, accentB, 1.0, 10.0)
         end
-        Susano.DrawText(cardX + 48, cardY + 17, "MIRAGE", 16, 1.0, 1.0, 1.0, 1.0)
+        Susano.DrawText(lx + logoS + 14, ly + 2, title, 18, 1.0, 1.0, 1.0, 1.0)
+        Susano.DrawText(lx + logoS + 14, ly + 26, subtitle, 12, 0.70, 0.74, 0.80, 0.95)
+    end
 
-        -- Sous-titre
-        Susano.DrawText(cardX + 22, cardY + 46, "Appuyez sur la touche qui l'ouvre", 14, 0.70, 0.74, 0.80, 0.95)
+    local function drawField(fx, fy, fw, fh)
+        Susano.DrawRectFilled(fx - 1, fy - 1, fw + 2, fh + 2, accentR, accentG, accentB, 0.55, 9.0)
+        Susano.DrawRectFilled(fx, fy, fw, fh, 0.030, 0.036, 0.050, 1.0, 8.0)
+    end
 
-        -- Champ de saisie touche (gauche)
-        local inX, inY, inW, inH = cardX + 22, cardY + 76, 296, 44
-        Susano.DrawRectFilled(inX - 1, inY - 1, inW + 2, inH + 2, 0.0, 95.0/255.0, 215.0/255.0, 0.65, 9.0)
-        Susano.DrawRectFilled(inX, inY, inW, inH, 0.08, 0.09, 0.12, 0.98, 8.0)
+    local function drawButton(bx, by, bw, bh, label, hover, primary)
+        local m = hover and 0.18 or 0.0
+        if primary then
+            Susano.DrawRectFilled(bx - 1, by - 1, bw + 2, bh + 2, accentR, accentG, accentB, hover and 0.95 or 0.50, 9.0)
+            Susano.DrawRectFilled(bx, by, bw, bh,
+                math.min(accentR + (1 - accentR) * m, 1), math.min(accentG + (1 - accentG) * m, 1), math.min(accentB + (1 - accentB) * m, 1), 1.0, 8.0)
+        else
+            Susano.DrawRectFilled(bx - 1, by - 1, bw + 2, bh + 2, 0.30, 0.34, 0.42, hover and 0.95 or 0.60, 9.0)
+            Susano.DrawRectFilled(bx, by, bw, bh, hover and 0.16 or 0.09, hover and 0.18 or 0.10, hover and 0.23 or 0.14, 1.0, 8.0)
+        end
+        local tw = Susano.GetTextWidth(label, 13)
+        Susano.DrawText(bx + (bw - tw) / 2, by + (bh - 13) / 2, label, 13, 1, 1, 1, primary and 1.0 or 0.88)
+    end
+
+    -- ── ECRAN KEYBINDER (Touche d'ouverture) ────────────────────────────────
+    if isFirstLoadBinding then
+        local cardW, cardH = CARD_W, 124
+        local cardX, cardY = cx - cardW / 2, cy - cardH / 2
+        drawCard(cardX, cardY, cardW, cardH)
+        drawHeader(cardX, cardY, "MIRAGE", "Appuyez sur la touche qui l'ouvre")
+
+        local rowY, rowH, btnW = cardY + 72, 38, 96
+        local inX, inW = cardX + PAD, cardW - PAD * 2 - btnW - 8
+        drawField(inX, rowY, inW, rowH)
         local keyName = (startupBindingName and startupBindingName ~= "") and startupBindingName or "F12"
-        Susano.DrawText(inX + 16, inY + (inH - 16) / 2, keyName, 16, 1.0, 1.0, 1.0, 1.0)
+        Susano.DrawText(inX + 14, rowY + (rowH - 15) / 2, keyName, 15, 1.0, 1.0, 1.0, 1.0)
 
-        -- Bouton TERMINÉ (droite)
-        local btnX, btnY, btnW, btnH = cardX + 22 + 296 + 12, cardY + 76, 108, 44
-        local isHover = (mx >= btnX and mx <= btnX + btnW and my >= btnY and my <= btnY + btnH)
-        if isHover then
-            Susano.DrawRectFilled(btnX, btnY, btnW, btnH, 0.05, 115.0/255.0, 240.0/255.0, 1.0, 8.0)
-        else
-            Susano.DrawRectFilled(btnX, btnY, btnW, btnH, 0.0, 95.0/255.0, 215.0/255.0, 1.0, 8.0)
-        end
-        local tw = Susano.GetTextWidth("TERMINÉ", 14)
-        Susano.DrawText(btnX + (btnW - tw) / 2, btnY + (btnH - 14) / 2, "TERMINÉ", 14, 1.0, 1.0, 1.0, 1.0)
-
+        local btnX = inX + inW + 8
+        local isHover = (mx >= btnX and mx <= btnX + btnW and my >= rowY and my <= rowY + rowH)
+        drawButton(btnX, rowY, btnW, rowH, "TERMINÉ", isHover, true)
         if isHover and justClicked then
             _G._bindingDoneClicked = true
             PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
@@ -795,56 +827,26 @@ function RenderBindingUI()
         return
     end
 
-    -- ── ECRAN AUTHENTIFICATION COMPACT & PRO ─────────────────────────────────
+    -- ── ECRAN AUTHENTIFICATION ───────────────────────────────────────────────
     if _G.AuthState.active then
         local now = GetGameTimer()
 
-        -- ── MODE CONFIRMATION IP AUTO-DETECTEE ──
+        -- Mode confirmation IP
         if _G.AuthState.confirmMode then
-            local cardW, cardH = 480, 154
-            local cardX = cx - cardW / 2
-            local cardY = cy - cardH / 2
-
-            Susano.DrawRectFilled(cardX - 4, cardY - 4, cardW + 8, cardH + 8, 0.0, 0.0, 0.0, 0.40, 16.0)
-            Susano.DrawRectFilled(cardX - 1, cardY - 1, cardW + 2, cardH + 2, 0.12, 0.20, 0.35, 0.75, 13.0)
-            Susano.DrawRectFilled(cardX, cardY, cardW, cardH, 0.06, 0.07, 0.09, 0.98, 12.0)
-
-            local logoTex = _G._loadingTex or _G._bannerTex
-            if logoTex and Susano.DrawImage then
-                Susano.DrawImage(logoTex, cardX + 22, cardY + 18, 18, 18, 1, 1, 1, 1, 4.0, 0, 0, 1, 1)
-            else
-                Susano.DrawRectFilled(cardX + 22, cardY + 18, 18, 18, 0.0, 95.0/255.0, 215.0/255.0, 1.0, 4.0)
-            end
-            Susano.DrawText(cardX + 48, cardY + 17, "MIRAGE", 16, 1.0, 1.0, 1.0, 1.0)
-
+            local cardW, cardH = CARD_W, 124
+            local cardX, cardY = cx - cardW / 2, cy - cardH / 2
+            drawCard(cardX, cardY, cardW, cardH)
             local nameDisplay = (_G.AuthState.confirmName and _G.AuthState.confirmName ~= "") and _G.AuthState.confirmName or "Inconnu"
-            Susano.DrawText(cardX + 22, cardY + 46, "IP reconnue : " .. nameDisplay .. "  —  confirmer ?", 14, 0.70, 0.74, 0.80, 0.95)
+            drawHeader(cardX, cardY, "MIRAGE", "IP reconnue : " .. nameDisplay)
 
-            -- Boutons : Confirmer (gauche) / Changer (droite)
-            local btnW, btnH = 208, 44
-            local b1x = cardX + 22
-            local b2x = cardX + 22 + btnW + 20
-            local bY  = cardY + 76
-
-            local hover1 = (mx >= b1x and mx <= b1x + btnW and my >= bY and my <= bY + btnH)
-            local hover2 = (mx >= b2x and mx <= b2x + btnW and my >= bY and my <= bY + btnH)
+            local rowY, rowH = cardY + 72, 38
+            local btnW = (cardW - PAD * 2 - 10) / 2
+            local b1x, b2x = cardX + PAD, cardX + PAD + btnW + 10
+            local hover1 = (mx >= b1x and mx <= b1x + btnW and my >= rowY and my <= rowY + rowH)
+            local hover2 = (mx >= b2x and mx <= b2x + btnW and my >= rowY and my <= rowY + rowH)
             local sel = _G.AuthState.confirmBtn or 1
-
-            if hover1 or sel == 1 then
-                Susano.DrawRectFilled(b1x, bY, btnW, btnH, 0.05, 115.0/255.0, 240.0/255.0, 1.0, 8.0)
-            else
-                Susano.DrawRectFilled(b1x, bY, btnW, btnH, 0.0, 95.0/255.0, 215.0/255.0, 0.85, 8.0)
-            end
-            local t1w = Susano.GetTextWidth("CONFIRMER", 14)
-            Susano.DrawText(b1x + (btnW - t1w) / 2, bY + (btnH - 14) / 2, "CONFIRMER", 14, 1, 1, 1, 1)
-
-            if hover2 or sel == 2 then
-                Susano.DrawRectFilled(b2x, bY, btnW, btnH, 0.25, 0.28, 0.35, 1.0, 8.0)
-            else
-                Susano.DrawRectFilled(b2x, bY, btnW, btnH, 0.14, 0.16, 0.20, 0.9, 8.0)
-            end
-            local t2w = Susano.GetTextWidth("CHANGER DE CLÉ", 14)
-            Susano.DrawText(b2x + (btnW - t2w) / 2, bY + (btnH - 14) / 2, "CHANGER DE CLÉ", 14, 0.85, 0.85, 0.85, 1)
+            drawButton(b1x, rowY, btnW, rowH, "CONFIRMER", hover1 or sel == 1, true)
+            drawButton(b2x, rowY, btnW, rowH, "CHANGER DE CLÉ", hover2 or sel == 2, false)
 
             if hover1 and justClicked then
                 _G._authConfirmBtn1Clicked = true
@@ -856,131 +858,86 @@ function RenderBindingUI()
             return
         end
 
-        -- ── MODE SAISIE NORMAL ──
-        local cardW, cardH = 480, 154
-        local cardX = cx - cardW / 2
-        local cardY = cy - cardH / 2
+        -- Mode saisie
+        local cardW, cardH = CARD_W, 136
+        local cardX, cardY = cx - cardW / 2, cy - cardH / 2
+        drawCard(cardX, cardY, cardW, cardH)
+        drawHeader(cardX, cardY, "MIRAGE", "Entrez votre clé d'authentification")
 
-        Susano.DrawRectFilled(cardX - 4, cardY - 4, cardW + 8, cardH + 8, 0.0, 0.0, 0.0, 0.40, 16.0)
-        Susano.DrawRectFilled(cardX - 1, cardY - 1, cardW + 2, cardH + 2, 0.12, 0.20, 0.35, 0.75, 13.0)
-        Susano.DrawRectFilled(cardX, cardY, cardW, cardH, 0.06, 0.07, 0.09, 0.98, 12.0)
-
-        -- Header : Logo + MIRAGE
-        local logoTex = _G._loadingTex or _G._bannerTex
-        if logoTex and Susano.DrawImage then
-            Susano.DrawImage(logoTex, cardX + 22, cardY + 18, 18, 18, 1, 1, 1, 1, 4.0, 0, 0, 1, 1)
-        else
-            Susano.DrawRectFilled(cardX + 22, cardY + 18, 18, 18, 0.0, 95.0/255.0, 215.0/255.0, 1.0, 4.0)
-        end
-        Susano.DrawText(cardX + 48, cardY + 17, "MIRAGE", 16, 1.0, 1.0, 1.0, 1.0)
-
-        -- Sous-titre
-        Susano.DrawText(cardX + 22, cardY + 46, "Entrez votre clé d'authentification", 14, 0.70, 0.74, 0.80, 0.95)
-
-        -- Action Row : Input (266px) + Bouton Coller 📋 (44px) + Bouton TERMINÉ (110px) = 436px
-        local inX, inY, inW, inH = cardX + 22, cardY + 74, 266, 44
-        Susano.DrawRectFilled(inX - 1, inY - 1, inW + 2, inH + 2, 0.0, 95.0/255.0, 215.0/255.0, 0.65, 9.0)
-        Susano.DrawRectFilled(inX, inY, inW, inH, 0.08, 0.09, 0.12, 0.98, 8.0)
+        local rowY, rowH = cardY + 72, 38
+        local pasteW, doneW = 38, 96
+        local inX = cardX + PAD
+        local inW = cardW - PAD * 2 - pasteW - doneW - 16
+        drawField(inX, rowY, inW, rowH)
 
         local buf = _G.AuthState.inputBuffer or ""
         local showCursor = ((now % 1000) < 500)
         if #buf == 0 then
-            Susano.DrawText(inX + 16, inY + (inH - 14) / 2, "Entrez votre clé...", 14, 0.40, 0.45, 0.52, 0.8)
+            Susano.DrawText(inX + 14, rowY + (rowH - 13) / 2, "Entrez votre clé...", 13, 0.40, 0.45, 0.52, 0.8)
             if showCursor then
-                Susano.DrawText(inX + 16, inY + (inH - 16) / 2, "|", 16, 0.0, 95.0/255.0, 215.0/255.0, 0.9)
+                Susano.DrawText(inX + 14, rowY + (rowH - 15) / 2, "|", 15, accentR, accentG, accentB, 0.95)
             end
         else
-            local disp = buf .. (showCursor and "|" or " ")
-            Susano.DrawText(inX + 16, inY + (inH - 15) / 2, disp, 15, 1.0, 1.0, 1.0, 1.0)
+            Susano.DrawText(inX + 14, rowY + (rowH - 14) / 2, buf .. (showCursor and "|" or " "), 14, 1.0, 1.0, 1.0, 1.0)
         end
 
-        -- Bouton Coller avec UNIQUEMENT l'émoticone 📋 (pas de texte "Coller")
-        local pasteX, pasteY, pasteW, pasteH = cardX + 22 + 266 + 8, cardY + 74, 44, 44
-        local isPasteHover = (mx >= pasteX and mx <= pasteX + pasteW and my >= pasteY and my <= pasteY + pasteH)
-        if isPasteHover then
-            Susano.DrawRectFilled(pasteX - 1, pasteY - 1, pasteW + 2, pasteH + 2, 0.0, 120.0/255.0, 240.0/255.0, 0.85, 9.0)
-            Susano.DrawRectFilled(pasteX, pasteY, pasteW, pasteH, 0.12, 0.16, 0.24, 0.98, 8.0)
-        else
-            Susano.DrawRectFilled(pasteX - 1, pasteY - 1, pasteW + 2, pasteH + 2, 0.15, 0.22, 0.35, 0.65, 9.0)
-            Susano.DrawRectFilled(pasteX, pasteY, pasteW, pasteH, 0.09, 0.11, 0.15, 0.98, 8.0)
+        -- Bouton Coller : icône dessinée (le texte emoji s'affichait "?")
+        local pasteX = inX + inW + 8
+        local isPasteHover = (mx >= pasteX and mx <= pasteX + pasteW and my >= rowY and my <= rowY + rowH)
+        Susano.DrawRectFilled(pasteX - 1, rowY - 1, pasteW + 2, rowH + 2, accentR, accentG, accentB, isPasteHover and 0.95 or 0.45, 9.0)
+        Susano.DrawRectFilled(pasteX, rowY, pasteW, rowH, isPasteHover and 0.12 or 0.07, isPasteHover and 0.15 or 0.09, isPasteHover and 0.22 or 0.13, 1.0, 8.0)
+        do
+            local iw, ih = 16, 20
+            local ix = pasteX + (pasteW - iw) / 2
+            local iy = rowY + (rowH - ih) / 2
+            Susano.DrawRectFilled(ix, iy + 3, iw, ih - 3, 0.50, 0.55, 0.65, 1.0, 3.0)      -- planche
+            Susano.DrawRectFilled(ix + 1.5, iy + 5, iw - 3, ih - 7, 0.94, 0.95, 0.98, 1.0, 2.0) -- feuille
+            Susano.DrawRectFilled(ix + 4, iy, iw - 8, 6, 0.26, 0.31, 0.42, 1.0, 2.0)       -- pince
+            Susano.DrawRectFilled(ix + 4, iy + 8, iw - 8, 1.5, 0.45, 0.50, 0.60, 1.0, 0.0) -- lignes
+            Susano.DrawRectFilled(ix + 4, iy + 12, iw - 8, 1.5, 0.45, 0.50, 0.60, 1.0, 0.0)
         end
-        local emW = Susano.GetTextWidth and Susano.GetTextWidth("📋", 18)
-        if emW and emW > 4 then
-            Susano.DrawText(pasteX + (pasteW - emW)/2, pasteY + (pasteH - 18)/2, "📋", 18, 1, 1, 1, 1)
-        else
-            local iconX = pasteX + (pasteW - 14) / 2
-            local iconY = pasteY + (pasteH - 18) / 2
-            Susano.DrawRectFilled(iconX, iconY + 3, 14, 15, 0.45, 0.50, 0.60, 0.9, 2.0)
-            Susano.DrawRectFilled(iconX + 2, iconY + 5, 10, 11, 0.92, 0.92, 0.95, 1.0, 1.0)
-            Susano.DrawRectFilled(iconX + 4, iconY, 6, 4, 0.25, 0.30, 0.40, 1.0, 1.0)
-            Susano.DrawRectFilled(iconX + 5, iconY + 1, 4, 2, 0.09, 0.11, 0.15, 1.0, 0.0)
-        end
-
         if isPasteHover and justClicked then
             _G._authPasteClicked = true
             if _G.DoAuthPaste then pcall(_G.DoAuthPaste) end
             PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
         end
 
-        -- Bouton TERMINÉ (Validation)
-        local btnX, btnY, btnW, btnH = cardX + 22 + 266 + 8 + 44 + 8, cardY + 74, 110, 44
-        local isDoneHover = (mx >= btnX and mx <= btnX + btnW and my >= btnY and my <= btnY + btnH)
-        if isDoneHover then
-            Susano.DrawRectFilled(btnX, btnY, btnW, btnH, 0.05, 115.0/255.0, 240.0/255.0, 1.0, 8.0)
-        else
-            Susano.DrawRectFilled(btnX, btnY, btnW, btnH, 0.0, 95.0/255.0, 215.0/255.0, 1.0, 8.0)
-        end
-        local tw = Susano.GetTextWidth("TERMINÉ", 14)
-        Susano.DrawText(btnX + (btnW - tw) / 2, btnY + (btnH - 14) / 2, "TERMINÉ", 14, 1.0, 1.0, 1.0, 1.0)
-
+        -- Bouton TERMINÉ
+        local btnX = pasteX + pasteW + 8
+        local isDoneHover = (mx >= btnX and mx <= btnX + doneW and my >= rowY and my <= rowY + rowH)
+        drawButton(btnX, rowY, doneW, rowH, "TERMINÉ", isDoneHover, true)
         if isDoneHover and justClicked then
             _G._authDoneClicked = true
             PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
         end
 
-        -- Ligne d'erreur ou d'aide en bas
+        -- Erreur / aide
+        local footY = cardY + 72 + rowH + 10
         if _G.AuthState.errorMsg and _G.AuthState.errorMsg ~= "" and now < _G.AuthState.errorTimer then
-            local ew = Susano.GetTextWidth(_G.AuthState.errorMsg, 13)
-            Susano.DrawText(cx - ew / 2, cardY + 128, _G.AuthState.errorMsg, 13, 1.0, 0.35, 0.35, 1.0)
+            local ew = Susano.GetTextWidth(_G.AuthState.errorMsg, 12)
+            Susano.DrawText(cx - ew / 2, footY, _G.AuthState.errorMsg, 12, 1.0, 0.35, 0.35, 1.0)
         else
-            local hw = Susano.GetTextWidth("ENTREE Valider  |  CLIQUEZ 📋 ou CTRL+V Coller", 12)
-            Susano.DrawText(cx - hw / 2, cardY + 128, "ENTREE Valider  |  CLIQUEZ 📋 ou CTRL+V Coller", 12, 0.40, 0.44, 0.50, 0.85)
+            local help = "ENTREE Valider  |  Icône ou CTRL+V pour coller"
+            local hw = Susano.GetTextWidth(help, 11)
+            Susano.DrawText(cx - hw / 2, footY, help, 11, 0.42, 0.46, 0.52, 0.9)
         end
         return
     end
 
-    -- ── ECRAN KEYBIND DYNAMIQUE F12 (bind d'options) ─────────────────────────
+    -- ── ECRAN BIND D'OPTION (couleur du thème actif) ─────────────────────────
     if isBindingNoclip then
-        local cardW, cardH = 460, 142
-        local cardX = cx - cardW / 2
-        local cardY = cy - cardH / 2
-
-        Susano.DrawRectFilled(cardX - 4, cardY - 4, cardW + 8, cardH + 8, 0.0, 0.0, 0.0, 0.40, 16.0)
-        Susano.DrawRectFilled(cardX - 1, cardY - 1, cardW + 2, cardH + 2, 0.12, 0.20, 0.35, 0.75, 13.0)
-        Susano.DrawRectFilled(cardX, cardY, cardW, cardH, 0.06, 0.07, 0.09, 0.98, 12.0)
-
-        local logoTex = _G._loadingTex or _G._bannerTex
-        if logoTex and Susano.DrawImage then
-            Susano.DrawImage(logoTex, cardX + 22, cardY + 18, 18, 18, 1, 1, 1, 1, 4.0, 0, 0, 1, 1)
-        else
-            Susano.DrawRectFilled(cardX + 22, cardY + 18, 18, 18, accentR, accentG, accentB, 1.0, 4.0)
-        end
+        local cardW, cardH = CARD_W, 124
+        local cardX, cardY = cx - cardW / 2, cy - cardH / 2
+        drawCard(cardX, cardY, cardW, cardH)
         local title = bindingActionData and bindingActionData.label or "Option"
-        Susano.DrawText(cardX + 48, cardY + 17, "BIND : " .. title, 16, 1.0, 1.0, 1.0, 1.0)
+        drawHeader(cardX, cardY, "BIND : " .. title, bindingText or "Appuyez sur une touche pour assigner")
 
-        local sub = bindingText or "Appuyez sur une touche pour assigner"
-        Susano.DrawText(cardX + 22, cardY + 46, sub, 14, 0.70, 0.74, 0.80, 0.95)
-
-        local inX, inY, inW, inH = cardX + 22, cardY + 76, 296, 44
-        Susano.DrawRectFilled(inX - 1, inY - 1, inW + 2, inH + 2, accentR, accentG, accentB, 0.65, 9.0)
-        Susano.DrawRectFilled(inX, inY, inW, inH, 0.08, 0.09, 0.12, 0.98, 8.0)
+        local rowY, rowH, btnW = cardY + 72, 38, 96
+        local inX, inW = cardX + PAD, cardW - PAD * 2 - btnW - 8
+        drawField(inX, rowY, inW, rowH)
         local keyText = bindingKeyDisplay ~= "" and bindingKeyDisplay or "Aucune"
-        Susano.DrawText(inX + 16, inY + (inH - 16) / 2, keyText, 16, 1.0, 1.0, 1.0, 1.0)
-
-        local btnX, btnY, btnW, btnH = cardX + 22 + 296 + 12, cardY + 76, 108, 44
-        Susano.DrawRectFilled(btnX, btnY, btnW, btnH, accentR, accentG, accentB, 1.0, 8.0)
-        local tw = Susano.GetTextWidth("TERMINÉ", 14)
-        Susano.DrawText(btnX + (btnW - tw) / 2, btnY + (btnH - 14) / 2, "TERMINÉ", 14, 1.0, 1.0, 1.0, 1.0)
+        Susano.DrawText(inX + 14, rowY + (rowH - 15) / 2, keyText, 15, 1.0, 1.0, 1.0, 1.0)
+        drawButton(inX + inW + 8, rowY, btnW, rowH, "TERMINÉ", false, true)
         return
     end
 end
@@ -1772,7 +1729,7 @@ function DrawFreecamHint()
     DrawFreecamCrosshair(cx, cy, h, tr, tg, tb)
 
     local total    = #FreecamOptions
-    local selected = FreecamSelectedOption or 1
+    local selected = _G.FreecamSelectedOption or 1
     local maxTextRight = cx + 80.0 * menuSc
 
     for slot = 1, total do
@@ -1781,6 +1738,7 @@ function DrawFreecamHint()
 
         local size = isSelected and sizeSel or sizeNorm
         local y    = startY + (slot - 1) * spacing
+        if y > h then break end  -- hors écran : inutile de dessiner
 
         local text = FreecamOptions[optIdx]
         if text == "Launch" then
@@ -2178,8 +2136,8 @@ function Menu.LoadLocalTheme()
 
     -- 1. PRIORITÉ ABSOLUE : API Cloud GhostShop (https://ghostshop.fr/api/mirage/config)
     if Susano and type(Susano.HttpGet) == "function" then
-        local userKey = nil
-        if io and type(io.open) == "function" then
+        local userKey = (_G.AuthedCode and #tostring(_G.AuthedCode) >= 8) and tostring(_G.AuthedCode) or nil
+        if not userKey and io and type(io.open) == "function" then
             local kf = io.open("c_auth_key.txt", "r")
             if kf then userKey = kf:read("*a"); kf:close() end
         end
