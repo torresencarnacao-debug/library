@@ -96,6 +96,7 @@ Menu.State = {
     launchAllActive = false,
     launchAllSoloActive = false,
     fuckAllCarsActive = false,
+    fuckAllCarsMode = 1,
     roadsterActive = false,
     protectActive = false,
     brokeAllActive = false,
@@ -979,7 +980,7 @@ Menu.Data.Options.Troll = {
 
             { type = "selector", name = "Kill All", options = {"Kill All", "Hard Kill All", "Kill All PNJ"}, valueIdx = 1, id = "kill_all_selector" },
             { type = "separator", label = "Vehicles" },
-            { type = "toggle", name = "Fuck All Cars", state = "fuckAllCarsActive" },
+            { type = "selector", name = "Fuck All Cars", options = {"Normal", "Controlled"}, valueIdx = 1, id = "fuck_all_cars_selector" },
             { type = "toggle", name = "Unlock All Vehicles", state = "unlockAllVehicleActive" },
             { type = "toggle", name = "Broke All", state = "brokeAllActive" },
         }
