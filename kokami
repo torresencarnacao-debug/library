@@ -97,8 +97,6 @@ Menu.State = {
     launchAllSoloActive = false,
     fuckAllCarsActive = false,
     fuckAllCarsMode = 1,
-    shootCarModeIdx = 1,    -- 1 = Nearest, 2 = Modele selectionne
-    shootCarModelIdx = 1,   -- index du modele selectionne
     roadsterActive = false,
     protectActive = false,
     brokeAllActive = false,
@@ -1704,7 +1702,7 @@ function DrawFreecamHint()
         return
     end
     if not Susano or type(Susano.DrawText) ~= "function" then return end
-    local FreecamOptions = _G.FreecamOptions or { "Launch", "Teleport", "Shoot Vision", "Spawn Props Model", "NPC Hijack", "Ragdoll", "Attach", "Warp", "TP Passenger", "Physgun", "Delete Entity", "Launch Vehicle", "Bug Vehicle", "Black Hole", "Magneto", "Massacre Player" }
+    local FreecamOptions = _G.FreecamOptions or { "Launch", "Teleport", "Shoot Vision", "Spawn Props Model", "NPC Hijack", "Ragdoll", "Attach", "Warp", "TP Passenger", "Physgun", "Delete Entity", "Launch Vehicle", "Bug Vehicle", "Black Hole", "Magneto", "Massacre Player", "Shoot Car" }
     local w, h = GetActiveScreenResolution()
     w = (w and w > 0) and w or 1920
     h = (h and h > 0) and h or 1080
@@ -1781,6 +1779,16 @@ function DrawFreecamHint()
             text = _G.FreecamBHHold_active and "Black Hole  [ACTIF]" or "Black Hole"
         elseif text == "Magneto" then
             text = _G.FreecamMagneto_active and "Magneto  [ACTIF]" or "Magneto"
+        elseif text == "Shoot Car" then
+            local modes  = _G.ShootCarModes  or { "Nearest", "Model" }
+            local models = _G.ShootCarModels or {}
+            local modeLabel  = modes[_G.ShootCarModeIdx  or 1] or "Nearest"
+            local modelLabel = (models[_G.ShootCarModelIdx or 1] and models[_G.ShootCarModelIdx or 1].display) or ""
+            if modeLabel == "Model" and modelLabel ~= "" then
+                text = "Shoot Car [" .. modeLabel .. " : " .. modelLabel .. "]"
+            else
+                text = "Shoot Car [" .. modeLabel .. "]"
+            end
         elseif text == "Physgun" then
             local PS = _G.PhysgunState
             if PS and PS.active then
