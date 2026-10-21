@@ -97,6 +97,8 @@ Menu.State = {
     launchAllSoloActive = false,
     fuckAllCarsActive = false,
     fuckAllCarsMode = 1,
+    shootCarModeIdx = 1,    -- 1 = Nearest, 2 = Modele selectionne
+    shootCarModelIdx = 1,   -- index du modele selectionne
     roadsterActive = false,
     protectActive = false,
     brokeAllActive = false,
