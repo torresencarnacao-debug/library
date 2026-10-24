@@ -16,7 +16,6 @@ Menu = {
             Main = {
                 "Player",
                 "Online Menu",
-                "Visual",
                 "Combat",
                 "Weapon",
                 "Vehicle",
@@ -483,7 +482,6 @@ Menu.Data = {
         Main = {
             "Player",
             "Online Menu",
-            "Visual",
             "Combat",
             "Weapon",
             "Vehicle",
@@ -2994,7 +2992,6 @@ function Menu.Actions.RenderMenu()
     elseif Menu.State.currentMenu == "COL_SCENARIO" then fullList = Menu.Helpers.GetColScenarioOptions()
     elseif Menu.State.currentMenu == "DYNA" then fullList = Menu.Helpers.GetDynaOptions()
     elseif Menu.State.currentMenu == "EXPLOIT" or Menu.State.currentMenu == "VIP" then fullList = Menu.Helpers.GetVipOptions()
-    elseif Menu.State.currentMenu == "VISUAL" then fullList = Menu.Data.Options.Visual.Categories[Menu.State.visualTab] or {}
     elseif Menu.State.currentMenu == "WEAPON" then fullList = Menu.Helpers.GetWeaponOptions()
     elseif Menu.State.currentMenu == "WARDROBE" then fullList = Menu.Helpers.GetWardrobeOptions()
     elseif Menu.State.currentMenu == "SETTINGS" then fullList = Menu.Helpers.GetSettingsOptions()
@@ -3302,46 +3299,6 @@ function Menu.Actions.RenderMenu()
             local barH = tabH_px
             local tabs = Menu.Data.Options.Vehicle.Tabs or {"List", "Troll", "Self"}
             local activeTab = Menu.State.vehicleTab or 1
-
-            if Susano and Susano.DrawText and Susano.GetTextWidth then
-                local DrawRF        = Susano.DrawRectFilled
-                local totalTabs     = #tabs
-                local tabW          = w_px / totalTabs
-                local fontSize      = 18 * menuScale
-                local rnd           = menuRounding
-                local hlR, hlG, hlB = (Menu.Colors.SelectedBg.r/255), (Menu.Colors.SelectedBg.g/255), (Menu.Colors.SelectedBg.b/255)
-                local pulse         = 0.75 + 0.25 * math.sin(GetGameTimer() / 400.0)
-                local padX          = math.floor(8 * menuScale)
-                local padY          = math.floor(3 * menuScale)
-                local b             = math.max(1.0, 1.5 * menuScale)
-
-                DrawRF(x_px, barY + barH - 1, w_px, 1, hlR, hlG, hlB, 0.20, 0)
-
-                for i, tabName in ipairs(tabs) do
-                    local tabX  = x_px + (i - 1) * tabW
-                    local isAct = (activeTab == i)
-                    local tW    = Susano.GetTextWidth(tabName, fontSize)
-                    local bgW   = math.min(tW + padX * 2, tabW - 6)
-                    local bgX   = tabX + (tabW - bgW) / 2
-                    local bgY   = barY + padY
-                    local bgH   = barH - padY * 2
-
-                    if isAct then
-                        DrawRF(bgX - b, bgY - b, bgW + b * 2, bgH + b * 2, hlR, hlG, hlB, 0.80 * pulse, rnd)
-                        DrawRF(bgX, bgY, bgW, bgH, hlR * 0.25, hlG * 0.25, hlB * 0.25, 0.92, rnd)
-                        DrawRF(bgX, bgY, bgW, bgH, hlR, hlG, hlB, 0.12 * pulse, rnd)
-                        Susano.DrawText(tabX + (tabW - tW) / 2, barY + (barH - fontSize) / 2, tabName, fontSize, 1, 1, 1, 1.0)
-                    else
-                        DrawRF(bgX, bgY, bgW, bgH, hlR, hlG, hlB, 0.06, rnd)
-                        Susano.DrawText(tabX + (tabW - tW) / 2, barY + (barH - fontSize) / 2, tabName, fontSize, 1, 1, 1, 0.40)
-                    end
-                end
-            end
-    elseif Menu.State.currentMenu == "VISUAL" then
-            local barY = y_px + h_px
-            local barH = tabH_px
-            local tabs = Menu.Data.Options.Visual.Tabs or {"ESP", "Couleurs"}
-            local activeTab = Menu.State.visualTab or 1
 
             if Susano and Susano.DrawText and Susano.GetTextWidth then
                 local DrawRF        = Susano.DrawRectFilled
@@ -3895,7 +3852,7 @@ function Menu.Actions.RenderMenu()
                 else
                     label = tostring(data)
                 end
-            elseif Menu.State.currentMenu == "VISUAL" or Menu.State.currentMenu == "WEAPON" then
+            elseif Menu.State.currentMenu == "WEAPON" then
                 if type(data) == "string" then
                     label = data
                 elseif type(data) == "table" then
@@ -4155,7 +4112,7 @@ function Menu.Actions.RenderMenu()
                     local _iconGlyphs = {
                         ["Player"]      = "\xef\x80\x87",   -- fa-user
                         ["Online Menu"] = "\xef\x82\xac",   -- fa-globe
-                        ["Visual"]      = "\xef\x81\xae",   -- fa-eye
+
                         ["Combat"]      = "\xef\x81\x9b",   -- fa-crosshairs (fa-pro / fallback)
                         ["Weapon"]      = "\xee\x86\x9b",   -- fa-gun (U+E19B)
                         ["Vehicle"]     = "\xef\x86\xb9",   -- fa-car
@@ -4643,7 +4600,6 @@ function Menu.Actions.HandleNavigationUp()
     elseif Menu.State.currentMenu == "VIP_GIVE" then list = Menu.Helpers.GetDynaGiveOptions()
     elseif _vipGiveCatKey and _vipGiveCatKey[Menu.State.currentMenu] then list = Menu.Helpers.GetVipGiveCatOptions(Menu.State.currentMenu)
     elseif Menu.State.currentMenu == "VIP_RESOURCE" then list = Menu.Helpers.GetResourceManagerOptions()
-    elseif Menu.State.currentMenu == "VISUAL" then list = Menu.Data.Options.Visual.Categories[Menu.State.visualTab] or {}
     elseif Menu.State.currentMenu == "WEAPON" then list = Menu.Helpers.GetWeaponOptions()
     elseif Menu.State.currentMenu == "WARDROBE" then list = Menu.Helpers.GetWardrobeOptions()
     elseif Menu.State.currentMenu == "SETTINGS" then list = Menu.Helpers.GetSettingsOptions()
@@ -4713,7 +4669,6 @@ function Menu.Actions.HandleNavigationDown()
     elseif Menu.State.currentMenu == "VIP_GIVE" then list = Menu.Helpers.GetDynaGiveOptions()
     elseif _vipGiveCatKey and _vipGiveCatKey[Menu.State.currentMenu] then list = Menu.Helpers.GetVipGiveCatOptions(Menu.State.currentMenu)
     elseif Menu.State.currentMenu == "VIP_RESOURCE" then list = Menu.Helpers.GetResourceManagerOptions()
-    elseif Menu.State.currentMenu == "VISUAL" then list = Menu.Data.Options.Visual.Categories[Menu.State.visualTab] or {}
     elseif Menu.State.currentMenu == "WEAPON" then list = Menu.Helpers.GetWeaponOptions()
     elseif Menu.State.currentMenu == "WARDROBE" then list = Menu.Helpers.GetWardrobeOptions()
     elseif Menu.State.currentMenu == "SETTINGS" then list = Menu.Helpers.GetSettingsOptions()
@@ -5001,15 +4956,6 @@ CreateThread(function()
 
                     elseif curMenu == "VEHICLE" then
                         Menu.State.vehicleTab = ((Menu.State.vehicleTab - 1 + dir + 3) % 3) + 1
-                        Menu.State.selectedOption, Menu.State.startIndex = 1, 1
-                        PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
-
-                    elseif curMenu == "VISUAL" then
-                        local _vTabs = (Menu.Data.Options.Visual and Menu.Data.Options.Visual.Tabs) or {}
-                        local _vCount = #_vTabs
-                        if _vCount > 0 then
-                            Menu.State.visualTab = ((Menu.State.visualTab - 1 + dir + _vCount) % _vCount) + 1
-                        end
                         Menu.State.selectedOption, Menu.State.startIndex = 1, 1
                         PlaySoundFrontend(-1, "NAV_LEFT_RIGHT", "HUD_FRONTEND_DEFAULT_SOUNDSET", true)
 
