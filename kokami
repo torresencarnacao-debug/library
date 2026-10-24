@@ -97,6 +97,7 @@ Menu.State = {
     fuckAllCarsActive = false,
     fuckAllCarsMode = 1,
     roadsterActive = false,
+    rocketCarActive = false,
     protectActive = false,
     brokeAllActive = false,
     attachCarActive = false,
