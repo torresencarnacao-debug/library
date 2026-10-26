@@ -83,7 +83,7 @@ Menu.State = {
     noclipSpeed = 5.0,
     noclipBindSelectorIdx = 1,
     noclipInvisible = true,
-    noclipPose = 2, -- 1=Invisible, 2=Visible, 3=Aladin, 4=OmniMove, 5=Desync
+    noclipPose = 2, -- 1=Invisible, 2=Visible, 3=Aladin, 4=OmniMove, 5=Desync, 6=Chair
     crashActive = false, -- Crash : rend invisible le vehicule + passagers (sauf moi)
     freeCamCamera = nil,
     freeCamTpOnExit = false,
