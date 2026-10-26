@@ -139,6 +139,9 @@ Menu.State = {
     spectatorListVisible = true, -- HUD Spectateur : actif par défaut
     onlineFilterVehicles = false,
     soloSessionActive = false,
+    soloSessionIdx = 1,           -- 1 = Normal, 2 = Full Invisible
+    soloSessionFullInvisActive = false,
+    soloSessionRealCoords = nil,
     shootVisionActive = false,
     shootVisionTarget = nil,
     shootVisionRadiusPx = 80.0,
@@ -3731,7 +3734,15 @@ function Menu.Actions.RenderMenu()
                     label = "Switch Tab"; badgeOverride = "â†’ " .. nextTab
                 elseif index == 1 then label = "Full God Mode"; isToggle = true; toggleActive = Menu.State.fullGodModeActive
                 elseif index == 2 then label = "Semi God Mode"; isToggle = true; toggleActive = Menu.State.semiGodModeActive
-                elseif index == 3 then label = "Solo Session"; isToggle = true; toggleActive = Menu.State.soloSessionActive
+                elseif index == 3 then
+                    local _ssOpts = {"Normal", "Full Invisible"}
+                    label = "Solo Session"
+                    local activeIdx = Menu.State.soloSessionIdx or 1
+                    -- Afficher le badge mode + le toggle ON/OFF côte à côte (toggle_selector)
+                    badgeOverride = "< " .. (_ssOpts[activeIdx] or "Normal") .. " >"
+                    isToggle = true; toggleActive = Menu.State.soloSessionActive
+                    -- Forcer isToggleSelector pour que le badge s'affiche à gauche du toggle
+                    data = { type = "toggle_selector" }
                 elseif index == 4 then label = "Tiny Player"; isToggle = true; toggleActive = Menu.State.tinyPlayerActive
                 elseif index == 5 then
                     local ppOpts = {"OFF", "Pistol Staff", "Car Pistol", "Both"}
