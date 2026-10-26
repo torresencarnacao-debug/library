@@ -3765,7 +3765,7 @@ function Menu.Actions.RenderMenu()
                 elseif index == 11 then label = "Spinbot"; isToggle = true; toggleActive = Menu.State.spinbotActive
                 else label = type(data) == "string" and data or (type(data) == "table" and (data.name or "?") or "?") end
             elseif Menu.State.currentMenu == "MOVEMENT" then
-                local _poseNames = {"Invisible", "Visible", "Aladin", "OmniMove", "Desync"}
+                local _poseNames = {"Invisible", "Visible", "Aladin", "OmniMove", "Desync", "Chair"}
                 if type(data) == "table" and data.type == "switch_tab" then
                     local nextTab = "Wardrobe"
                     label = "Switch Tab"; badgeOverride = "â†’ " .. nextTab
