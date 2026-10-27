@@ -136,7 +136,7 @@ Menu.State = {
     bugVehicleForce = 50,
     deleteEntityMode = 1, -- 1: VEHICLE, 2: NPC, 3: PROP
     hudBindsVisible = true, -- HUD coin écran : touches actives
-    spectatorListVisible = true, -- HUD Spectateur : actif par défaut
+    spectatorListVisible = false, -- HUD Spectateur : désactivé par défaut
     onlineFilterVehicles = false,
     soloSessionActive = false,
     soloSessionIdx = 1,           -- 1 = Normal, 2 = Full Invisible
@@ -625,7 +625,7 @@ function RenderBindingUI()
         local fieldW, fieldH = 260, 32
         local fx = cx - fieldW / 2
         local fy = y + off + 56
-        Susano.DrawRectFilled(fx, fy, fieldW, fieldH, accentR * 0.22, accentG * 0.22, accentB * 0.22, 0.95, 5.0)
+        Susano.DrawRectFilled(fx, fy, fieldW, fieldH, 0.0, 0.0, 0.0, 0.95, 5.0)
         Susano.DrawRectFilled(fx, fy + fieldH - 2, fieldW, 2, accentR, accentG, accentB, 0.95, 0.0)
         local mw = Susano.GetTextWidth(displayStr, 20)
         Susano.DrawText(cx - mw / 2, fy + 7, displayStr, 20, 1, 1, 1, 1)
@@ -673,7 +673,7 @@ function RenderBindingUI()
         local fieldW, fieldH = 310, 32
         local fx = cx - fieldW / 2
         local fy = y + off + 56
-        Susano.DrawRectFilled(fx, fy, fieldW, fieldH, accentR * 0.22, accentG * 0.22, accentB * 0.22, 0.95, 5.0)
+        Susano.DrawRectFilled(fx, fy, fieldW, fieldH, 0.0, 0.0, 0.0, 0.95, 5.0)
         Susano.DrawRectFilled(fx, fy + fieldH - 2, fieldW, 2, accentR, accentG, accentB, 0.95, 0.0)
         local dw = Susano.GetTextWidth(display, 18)
         Susano.DrawText(cx - dw / 2, fy + 7, display, 18, 1, 1, 1, 1)
@@ -730,7 +730,7 @@ function RenderBindingUI()
         local fW2, fH2 = 310, 32
         local fx2 = cx - fW2 / 2
         local fy2 = y2 + off2 + 56
-        Susano.DrawRectFilled(fx2, fy2, fW2, fH2, accentR * 0.22, accentG * 0.22, accentB * 0.22, 0.95, 5.0)
+        Susano.DrawRectFilled(fx2, fy2, fW2, fH2, 0.0, 0.0, 0.0, 0.95, 5.0)
         Susano.DrawRectFilled(fx2, fy2 + fH2 - 2, fW2, 2, accentR, accentG, accentB, 0.95, 0.0)
         local dw2 = Susano.GetTextWidth(disp2, 18)
         Susano.DrawText(cx - dw2 / 2, fy2 + 7, disp2, 18, 1, 1, 1, 1)
@@ -767,10 +767,8 @@ function RenderBindingUI()
         Susano.DrawRectFilled(x - 3, y - 3, w + 6, h + 6, accentR, accentG, accentB, 0.14, rad + 3)
         -- bordure accent nette
         Susano.DrawRectFilled(x - 1.5, y - 1.5, w + 3, h + 3, accentR, accentG, accentB, 0.95, rad + 1.5)
-        -- fond
-        Susano.DrawRectFilled(x, y, w, h, 0.045, 0.052, 0.070, 1.0, rad)
-        -- reflet léger en haut
-        Susano.DrawRectFilled(x + 1, y + 1, w - 2, h * 0.42, 1, 1, 1, 0.025, rad)
+        -- fond noir pur uniforme (sans reflet)
+        Susano.DrawRectFilled(x, y, w, h, 0.0, 0.0, 0.0, 1.0, rad)
     end
 
     local function drawHeader(x, y, title, subtitle)
@@ -778,7 +776,7 @@ function RenderBindingUI()
         local lx, ly = x + PAD, y + 16
         -- anneau accent autour du logo
         Susano.DrawRectFilled(lx - 2, ly - 2, logoS + 4, logoS + 4, accentR, accentG, accentB, 0.60, 13.0)
-        Susano.DrawRectFilled(lx - 1, ly - 1, logoS + 2, logoS + 2, 0.045, 0.052, 0.070, 1.0, 12.0)
+        Susano.DrawRectFilled(lx - 1, ly - 1, logoS + 2, logoS + 2, 0.0, 0.0, 0.0, 1.0, 12.0)
         local logoTex = _G._loadingTex or _G._bannerTex
         if logoTex and Susano.DrawImage then
             Susano.DrawImage(logoTex, lx, ly, logoS, logoS, 1, 1, 1, 1, 10.0, 0, 0, 1, 1)
@@ -791,7 +789,7 @@ function RenderBindingUI()
 
     local function drawField(fx, fy, fw, fh)
         Susano.DrawRectFilled(fx - 1, fy - 1, fw + 2, fh + 2, accentR, accentG, accentB, 0.55, 9.0)
-        Susano.DrawRectFilled(fx, fy, fw, fh, 0.030, 0.036, 0.050, 1.0, 8.0)
+        Susano.DrawRectFilled(fx, fy, fw, fh, 0.0, 0.0, 0.0, 1.0, 8.0)
     end
 
     local function drawButton(bx, by, bw, bh, label, hover, primary)
@@ -802,7 +800,7 @@ function RenderBindingUI()
                 math.min(accentR + (1 - accentR) * m, 1), math.min(accentG + (1 - accentG) * m, 1), math.min(accentB + (1 - accentB) * m, 1), 1.0, 8.0)
         else
             Susano.DrawRectFilled(bx - 1, by - 1, bw + 2, bh + 2, 0.30, 0.34, 0.42, hover and 0.95 or 0.60, 9.0)
-            Susano.DrawRectFilled(bx, by, bw, bh, hover and 0.16 or 0.09, hover and 0.18 or 0.10, hover and 0.23 or 0.14, 1.0, 8.0)
+            Susano.DrawRectFilled(bx, by, bw, bh, hover and 0.16 or 0.0, hover and 0.16 or 0.0, hover and 0.16 or 0.0, 1.0, 8.0)
         end
         local tw = Susano.GetTextWidth(label, 13)
         Susano.DrawText(bx + (bw - tw) / 2, by + (bh - 13) / 2, label, 13, 1, 1, 1, primary and 1.0 or 0.88)
@@ -889,7 +887,7 @@ function RenderBindingUI()
         local pasteX = inX + inW + 8
         local isPasteHover = (mx >= pasteX and mx <= pasteX + pasteW and my >= rowY and my <= rowY + rowH)
         Susano.DrawRectFilled(pasteX - 1, rowY - 1, pasteW + 2, rowH + 2, accentR, accentG, accentB, isPasteHover and 0.95 or 0.45, 9.0)
-        Susano.DrawRectFilled(pasteX, rowY, pasteW, rowH, isPasteHover and 0.12 or 0.07, isPasteHover and 0.15 or 0.09, isPasteHover and 0.22 or 0.13, 1.0, 8.0)
+        Susano.DrawRectFilled(pasteX, rowY, pasteW, rowH, isPasteHover and 0.12 or 0.0, isPasteHover and 0.12 or 0.0, isPasteHover and 0.12 or 0.0, 1.0, 8.0)
         do
             local iw, ih = 16, 20
             local ix = pasteX + (pasteW - iw) / 2
@@ -4106,11 +4104,11 @@ function Menu.Actions.RenderMenu()
                      local success, txtW = pcall(Susano.GetTextWidth, cleanLabel, fontSize)
                      if success and txtW then
                         textX = leftX_px + (menuW_px - txtW)/2
-                        -- Separator lines (matching reference style)
+                        -- Separator lines (couleur du thème actif)
                         local lineW = (menuW_px - txtW - 20 * menuScale) / 2
                         if lineW > 0 then
-                            Susano.DrawRectFilled(leftX_px + 5, rowY_px + optH_px/2, lineW, 1, 1, 1, 1, 0.2, 0)
-                            Susano.DrawRectFilled(leftX_px + menuW_px - lineW - 5, rowY_px + optH_px/2, lineW, 1, 1, 1, 1, 0.2, 0)
+                            Susano.DrawRectFilled(leftX_px + 5, rowY_px + optH_px/2, lineW, 1, sideR, sideG, sideB, 0.55, 0)
+                            Susano.DrawRectFilled(leftX_px + menuW_px - lineW - 5, rowY_px + optH_px/2, lineW, 1, sideR, sideG, sideB, 0.55, 0)
                         end
                      end
                 end
