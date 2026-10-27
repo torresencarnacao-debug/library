@@ -3696,7 +3696,7 @@ function Menu.Actions.RenderMenu()
                 label = "Switch Tab"
                 badgeOverride = "â†’ " .. nextTabName
             elseif type(data) == "table" and data.type == "selector" then
-                -- Universal rule for ALL menus: if it's a selector, show the badge
+                -- Bloc universel : affiche l'option courante du selector
                 label = data.name
                 if data.id == "kill_all_selector" then
                     local idx = data.valueIdx or 1
@@ -3710,6 +3710,62 @@ function Menu.Actions.RenderMenu()
                     local states = {"launchAllActive", "launchAllSoloActive"}
                     local isOn = Menu.State[states[idx]]
                     badgeOverride = (isOn and "[ON] " or "") .. names[idx]
+                elseif data.id == "fuck_all_cars_selector" then
+                    local idx = data.valueIdx or 1
+                    local names = {"Normal", "Controlled", "Tornado"}
+                    local isOn = Menu.State.fuckAllCarsActive
+                    badgeOverride = (isOn and "[ON] " or "") .. (names[idx] or "Normal")
+                elseif data.id == "noclip_pose_sel" then
+                    -- Synchronise avec Menu.State.noclipPose (source de vérité)
+                    local poseNames = {"Invisible", "Visible", "Aladin", "OmniMove", "Desync", "Chair"}
+                    badgeOverride = poseNames[Menu.State.noclipPose or 1] or "Invisible"
+                elseif data.id == "solo_session" then
+                    local idx = Menu.State.soloSessionIdx or data.valueIdx or 1
+                    local opts = data.options or {"Normal", "Full Invisible"}
+                    badgeOverride = opts[idx] or "Normal"
+                    isToggle = true; toggleActive = Menu.State.soloSessionActive
+                    data = { type = "toggle_selector" }
+                elseif data.id == "sit_on_vehicle" then
+                    local idx = Menu.State.sitPoseIdx or data.valueIdx or 1
+                    local isOn = Menu.State.sitOnVehicleActive
+                    badgeOverride = (isOn and "[ON] " or "") .. (data.options[idx] or "Meditation")
+                elseif data.id == "builder_veh" then
+                    local bIdx = Menu.State.builderMode or 1
+                    local builderOpts = {"Ramp", "Tour", "Cross"}
+                    local isOn = (bIdx == 1 and Menu.State.rampVehicleActive)
+                              or (bIdx == 2 and Menu.State.tourActive)
+                              or (bIdx == 3 and Menu.State.crossActive)
+                    badgeOverride = (isOn and "[ON] " or "") .. (builderOpts[bIdx] or "Ramp")
+                elseif data.id == "self_handling" then
+                    local idx = data.valueIdx or 1
+                    local isOn = (idx == 1 and Menu.State.easyHandlingActive) or (idx == 2 and shiftBoostActive)
+                    badgeOverride = (isOn and "[ON] " or "") .. (data.options[idx] or "?")
+                elseif data.id == "misc_tp_passager" then
+                    local idx = Menu.State.tpPassagerIdx or data.valueIdx or 1
+                    badgeOverride = data.options[idx] or "?"
+                elseif data.id == "vip_mapcollision" then
+                    local scenarios = Menu.Helpers.GetColScenarios and Menu.Helpers.GetColScenarios() or {}
+                    local sidx = Menu.State.colSpamScenarioIdx or 1
+                    local sshort = (scenarios[sidx] and scenarios[sidx].short) or (data.options[sidx] or "?")
+                    local stateStr = Menu.State.colSpammerActive and " [ON]" or ""
+                    label = "Map Collision" .. stateStr
+                    badgeOverride = sshort
+                elseif data.id == "zeub_veh" then
+                    local idx = data.valueIdx or 1
+                    local opt = data.options[idx] or "?"
+                    if idx == 1 and Menu.State.blackHoleActive then opt = "Black Hole" end
+                    badgeOverride = opt
+                elseif data.id == "mirage_pewpew" then
+                    local ppOpts = {"OFF", "Pistol Staff", "Car Pistol", "Both"}
+                    local activeIdx  = Menu.State.miragePewPewIdx or 1
+                    local previewIdx = Menu.State.miragePewPewPreviewIdx or 1
+                    if previewIdx ~= activeIdx then
+                        badgeOverride = (ppOpts[previewIdx] or "?") .. " ?"
+                    elseif activeIdx == 1 then
+                        badgeOverride = "OFF"
+                    else
+                        badgeOverride = ppOpts[activeIdx]
+                    end
                 else
                     badgeOverride = tostring(data.options[data.valueIdx] or "None")
                 end
