@@ -3703,7 +3703,6 @@ function Menu.Actions.RenderMenu()
                     local names = {"Kill All", "Hard Kill All", "Kill All PNJ"}
                     local states = {"killAllActive", "hardKillAllActive", "killAllPnjActive"}
                     local isOn = Menu.State[states[idx]]
-                    local arrow = idx > 1 and ("< " .. names[idx] .. " >") or ("< " .. names[idx] .. " >")
                     badgeOverride = (isOn and "[ON] " or "") .. names[idx]
                 elseif data.id == "launch_all_selector" then
                     local idx = data.valueIdx or 1
@@ -3712,7 +3711,7 @@ function Menu.Actions.RenderMenu()
                     local isOn = Menu.State[states[idx]]
                     badgeOverride = (isOn and "[ON] " or "") .. names[idx]
                 else
-                    badgeOverride = "< " .. tostring(data.options[data.valueIdx] or "None") .. " >"
+                    badgeOverride = tostring(data.options[data.valueIdx] or "None")
                 end
             elseif type(data) == "table" and data.type == "wardrobe_item" then
                 -- Wardrobe parts: Name on left, value on right
@@ -3736,7 +3735,7 @@ function Menu.Actions.RenderMenu()
                     label = "Solo Session"
                     local activeIdx = Menu.State.soloSessionIdx or 1
                     -- Afficher le badge mode + le toggle ON/OFF côte à côte (toggle_selector)
-                    badgeOverride = "< " .. (_ssOpts[activeIdx] or "Normal") .. " >"
+                    badgeOverride = _ssOpts[activeIdx] or "Normal"
                     isToggle = true; toggleActive = Menu.State.soloSessionActive
                     -- Forcer isToggleSelector pour que le badge s'affiche à gauche du toggle
                     data = { type = "toggle_selector" }
@@ -3823,7 +3822,7 @@ function Menu.Actions.RenderMenu()
                     elseif data.type == "selector" and data.id == "misc_tp_passager" then
                         local idx = Menu.State.tpPassagerIdx or 1
                         data.valueIdx = idx
-                        badgeOverride = "< " .. (data.options[idx] or "?") .. " >"
+                        badgeOverride = data.options[idx] or "?"
                     elseif data.type == "submenu" then
                         -- submenu : pas de décoration supplémentaire, la flèche ▶ est dans le nom
                     end
@@ -3842,7 +3841,7 @@ function Menu.Actions.RenderMenu()
                         local sshort = (scenarios[sidx] and scenarios[sidx].short) or "Welding"
                         local stateStr = Menu.State.colSpammerActive and " [ON]" or " [OFF]"
                         label = "Map Collision" .. stateStr
-                        badgeOverride = "< " .. sshort .. " >"
+                        badgeOverride = sshort
                     elseif data.type == "slider" and data.id == "vip_spam_speed" then
                         -- Slider vitesse : label simple, valeur ms affichée à gauche du slider
                         local rawSpeed = Menu.State.colSpamSpeed or 10
