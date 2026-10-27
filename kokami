@@ -3056,11 +3056,10 @@ function Menu.Actions.RenderMenu()
                 Susano.DrawRectFilled(x_px, y_px, w_px, totalH_px, 0, 0, 0, 0.97, menuRounding)
             else
                 -- 3 = ANIM : Bordure animée qui épouse parfaitement les coins arrondis du menu
-                local now = GetGameTimer()
-                local pulse = 0.60 + 0.25 * math.sin(now / 400.0)
-                -- Bordure de base subtile
-                Susano.DrawRectFilled(x_px - b, y_px - b, w_px + b * 2, totalH_px + b * 2, sideR, sideG, sideB, 0.40 * pulse, menuRounding)
-                Susano.DrawRectFilled(x_px, y_px, w_px, totalH_px, 0, 0, 0, 0.97, menuRounding)
+                -- Liseré fixe (opacité stable, pas de pulse pour éviter le flickering du fond)
+                Susano.DrawRectFilled(x_px - b, y_px - b, w_px + b * 2, totalH_px + b * 2, sideR, sideG, sideB, 0.35, menuRounding)
+                -- Fond redessine par-dessus pour masquer proprement la bordure (opacite fixe = pas de variation visible)
+                Susano.DrawRectFilled(x_px, y_px, w_px, totalH_px, 0, 0, 0, 1.0, menuRounding)
 
                 -- Faisceau animé qui suit exactement les 4 coins arrondis (menuRounding)
                 Menu.Helpers.DrawRoundedBorderAnim(x_px, y_px, w_px, totalH_px, menuRounding, sideR, sideG, sideB, menuScale)
