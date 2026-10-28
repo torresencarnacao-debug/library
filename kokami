@@ -3849,6 +3849,12 @@ function Menu.Actions.RenderMenu()
                     label = data.name; isToggle = true; toggleActive = Menu.State[data.state]
                 elseif data == "Rage Bot" then
                     label = "Rage Bot"; isToggle = true; toggleActive = Menu.State.shootVisionActive
+                elseif type(data) == "table" and data.type == "selector" and data.id == "shoot_vision_mode" then
+                    label = "Mode Bot"
+                    local modeNames = { "Normal", "Natif" }
+                    local idx = Menu.State.shootVisionMode or data.valueIdx or 1
+                    data.valueIdx = idx
+                    badgeOverride = modeNames[idx] or "?"
                 elseif data == "Rapid Fire" then
                     label = "Rapid Fire"; isToggle = true; toggleActive = Menu.State.rapidFireActive
                 elseif data == "Damage Boost" then
