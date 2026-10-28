@@ -1789,6 +1789,12 @@ function DrawFreecamHint()
             else
                 text = "Shoot Car [" .. modeLabel .. "]"
             end
+        elseif text == "Shoot Vision" then
+            local modes = _G.ShootVisionModes or { "Normal", "Natif" }
+            local mIdx = _G.ShootVisionModeIdx or 1
+            local active = (shootVisionActive == true or (Menu.State and Menu.State.shootVisionActive == true))
+            local statusStr = active and " [ON]" or ""
+            text = "Shoot Vision [" .. (modes[mIdx] or "Normal") .. "]" .. statusStr
         elseif text == "Physgun" then
             local PS = _G.PhysgunState
             if PS and PS.active then
@@ -3849,12 +3855,6 @@ function Menu.Actions.RenderMenu()
                     label = data.name; isToggle = true; toggleActive = Menu.State[data.state]
                 elseif data == "Rage Bot" then
                     label = "Rage Bot"; isToggle = true; toggleActive = Menu.State.shootVisionActive
-                elseif type(data) == "table" and data.type == "selector" and data.id == "shoot_vision_mode" then
-                    label = "Mode Bot"
-                    local modeNames = { "Normal", "Natif" }
-                    local idx = Menu.State.shootVisionMode or data.valueIdx or 1
-                    data.valueIdx = idx
-                    badgeOverride = modeNames[idx] or "?"
                 elseif data == "Rapid Fire" then
                     label = "Rapid Fire"; isToggle = true; toggleActive = Menu.State.rapidFireActive
                 elseif data == "Damage Boost" then
