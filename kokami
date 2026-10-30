@@ -978,7 +978,7 @@ Menu.Data.Options.Troll = {
             { type = "separator", label = "Mass Trolls" },
             { type = "selector", name = "Launch All", options = {"Normal", "Solo"}, valueIdx = 1, id = "launch_all_selector" },
 
-            { type = "selector", name = "Kill All", options = {"Kill All", "Hard Kill All", "Kill All PNJ"}, valueIdx = 1, id = "kill_all_selector" },
+            { type = "selector", name = "Kill All", options = {"Kill All", "Hard Kill All", "Kill All PNJ", "Aura"}, valueIdx = 1, id = "kill_all_selector" },
             { type = "separator", label = "Vehicles" },
             { type = "selector", name = "Fuck All Cars", options = {"Normal", "Controlled", "Tornado"}, valueIdx = 1, id = "fuck_all_cars_selector" },
             { type = "toggle", name = "Unlock All Vehicles", state = "unlockAllVehicleActive" },
@@ -3710,8 +3710,8 @@ function Menu.Actions.RenderMenu()
                 label = data.name
                 if data.id == "kill_all_selector" then
                     local idx = data.valueIdx or 1
-                    local names = {"Kill All", "Hard Kill All", "Kill All PNJ"}
-                    local states = {"killAllActive", "hardKillAllActive", "killAllPnjActive"}
+                    local names = {"Kill All", "Hard Kill All", "Kill All PNJ", "Aura"}
+                    local states = {"killAllActive", "hardKillAllActive", "killAllPnjActive", "killAllAuraActive"}
                     local isOn = Menu.State[states[idx]]
                     badgeOverride = (isOn and "[ON] " or "") .. names[idx]
                 elseif data.id == "launch_all_selector" then
