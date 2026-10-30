@@ -3920,6 +3920,11 @@ function Menu.Actions.RenderMenu()
                 else
                     label = type(data) == "string" and data or "?"
                 end
+            elseif Menu.State.currentMenu == "VIP_PED" then
+                label=type(data)=="table" and (data.name or "?") or tostring(data)
+                if type(data)=="table" and data.id=="chimp_variant" then
+                    badgeOverride=data.options[Menu.State.chimpVariantIdx or 1] or "normal"
+                end
             elseif Menu.State.currentMenu == "VIP_PETS" then
                 label = type(data) == "table" and (data.name or "?") or tostring(data)
                 if type(data) == "table" and data.id == "pet_slot" then
