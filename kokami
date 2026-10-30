@@ -961,7 +961,7 @@ Menu.Data.Options.Troll = {
             { type = "separator", label = "Advanced" },
             { type = "selector", name = "Attach Player", options = {"Punch", "Babayaga"}, valueIdx = 1, id = "attach_player_mode" },
             { type = "toggle", name = "Spectate", state = "spectateActive" },
-            { type = "selector", name = "Attach Anim", options = {"Twerk", "Sucer", "Sex", "Wank", "Piggyback", "Épaule"}, valueIdx = 1, id = "attach_anim" }
+            { type = "selector", name = "Attach Anim", options = {"Twerk", "Sucer", "Sex", "Wank", "Piggyback", "Épaule (chat)"}, valueIdx = 1, id = "attach_anim" }
         },
         [3] = { -- Vehicle Tab
             { type = "separator", label = "Vehicle Trolls" },
@@ -3919,6 +3919,11 @@ function Menu.Actions.RenderMenu()
                     end
                 else
                     label = type(data) == "string" and data or "?"
+                end
+            elseif Menu.State.currentMenu == "VIP_PETS" then
+                label = type(data) == "table" and (data.name or "?") or tostring(data)
+                if type(data) == "table" and data.id == "pet_slot" then
+                    badgeOverride = data.options[Menu.State.petSlotIdx or 1] or "head"
                 end
             elseif Menu.State.currentMenu == "PROPS" or Menu.State.currentMenu == "CLIENT_PEDS" or Menu.State.currentMenu == "CLIENT_PEDS_ANIMALS" or Menu.State.currentMenu == "CLIENT_PEDS_ADDONS" then
                 if type(data) == "table" then
