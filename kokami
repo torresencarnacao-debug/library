@@ -3000,6 +3000,8 @@ function Menu.Actions.RenderMenu()
     elseif Menu.State.currentMenu == "COL_SCENARIO" then fullList = Menu.Helpers.GetColScenarioOptions()
     elseif Menu.State.currentMenu == "DYNA" then fullList = Menu.Helpers.GetDynaOptions()
     elseif Menu.State.currentMenu == "EXPLOIT" or Menu.State.currentMenu == "VIP" then fullList = Menu.Helpers.GetVipOptions()
+    elseif Menu.State.currentMenu == "VIP_AURA" then fullList = Menu.Helpers.GetAuraOptions()
+    elseif Menu.State.currentMenu == "VIP_PETS" then fullList = Menu.Helpers.GetPetsOptions()
     elseif Menu.State.currentMenu == "WEAPON" then fullList = Menu.Helpers.GetWeaponOptions()
     elseif Menu.State.currentMenu == "WARDROBE" then fullList = Menu.Helpers.GetWardrobeOptions()
     elseif Menu.State.currentMenu == "SETTINGS" then fullList = Menu.Helpers.GetSettingsOptions()
@@ -3432,6 +3434,8 @@ function Menu.Actions.RenderMenu()
             elseif Menu.State.currentMenu == "WARDROBE" then subtitle = "Wardrobe"
             elseif Menu.State.currentMenu == "KEYBINDS" then subtitle = "Keybinds"
             elseif Menu.State.currentMenu == "EXPLOIT" or Menu.State.currentMenu == "VIP" then subtitle = "Exploit"
+            elseif Menu.State.currentMenu == "VIP_AURA" then subtitle = "Exploit - Aura"
+            elseif Menu.State.currentMenu == "VIP_PETS" then subtitle = "Exploit - Pets"
             elseif Menu.State.currentMenu == "VIP_PED" then subtitle = "VIP - Ped"
             elseif Menu.State.currentMenu == "VIP_GIVE" then subtitle = "VIP - Give"
             elseif Menu.State.currentMenu == "VIP_GIVE_PISTOL"  then subtitle = "Add-Ons - Pistol"
@@ -4586,7 +4590,7 @@ function Menu.Actions.HandleBackNavigation()
     elseif _vipGiveCatKey and _vipGiveCatKey[Menu.State.currentMenu] then
         Menu.State.currentMenu = "VIP_GIVE"
         Menu.State.selectedOption, Menu.State.startIndex = 1, 1
-    elseif Menu.State.currentMenu == "VIP_PED" or Menu.State.currentMenu == "VIP_GIVE" or Menu.State.currentMenu == "VIP_RESOURCE" then
+    elseif Menu.State.currentMenu == "VIP_AURA" or Menu.State.currentMenu == "VIP_PETS" or Menu.State.currentMenu == "VIP_PED" or Menu.State.currentMenu == "VIP_GIVE" or Menu.State.currentMenu == "VIP_RESOURCE" then
         Menu.State.currentMenu = "EXPLOIT"
         Menu.State.selectedOption, Menu.State.startIndex = 1, 1
     elseif Menu.State.currentMenu == "SETTINGS_RENDER" or Menu.State.currentMenu == "SETTINGS_UTILITY" then
