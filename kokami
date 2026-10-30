@@ -961,7 +961,7 @@ Menu.Data.Options.Troll = {
             { type = "separator", label = "Advanced" },
             { type = "selector", name = "Attach Player", options = {"Punch", "Babayaga"}, valueIdx = 1, id = "attach_player_mode" },
             { type = "toggle", name = "Spectate", state = "spectateActive" },
-            { type = "selector", name = "Attach Anim", options = {"Twerk", "Sucer", "Sex", "Wank", "Piggyback"}, valueIdx = 1, id = "attach_anim" }
+            { type = "selector", name = "Attach Anim", options = {"Twerk", "Sucer", "Sex", "Wank", "Piggyback", "Épaule"}, valueIdx = 1, id = "attach_anim" }
         },
         [3] = { -- Vehicle Tab
             { type = "separator", label = "Vehicle Trolls" },
