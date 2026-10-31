@@ -261,6 +261,10 @@ end
 
 function Menu.Helpers.GetFullListForMenu(menu)
     local m = menu or (Menu.State and Menu.State.currentMenu) or "MAIN"
+    if m=="EXPLOIT" or m=="VIP" then
+        if type(Menu.Helpers.GetVipOptions)=="function" then return Menu.Helpers.GetVipOptions() end
+        return {}
+    end
     if Menu.Data and Menu.Data.Options and Menu.Data.Options[m] then
         return Menu.Data.Options[m]
     end
@@ -3898,7 +3902,10 @@ function Menu.Actions.RenderMenu()
             elseif Menu.State.currentMenu == "EXPLOIT" or Menu.State.currentMenu == "VIP" then
                 if type(data) == "table" then
                     label = data.name or "?"
-                    if data.type == "toggle" then
+                    if data.id=="radio_usebug" then
+                        label="Radio Usebug"
+                        if Menu.State.radioTestActive then badgeOverride="[TEST]" end
+                    elseif data.type == "toggle" then
                         isToggle = true; toggleActive = Menu.State[data.state]
                     elseif data.type == "selector" and data.id == "vip_mapcollision" then
                         -- Selecteur scenario : badge = scenario, label = Map Collision [ON/OFF]
