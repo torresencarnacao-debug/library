@@ -265,6 +265,7 @@ function Menu.Helpers.GetFullListForMenu(menu)
         if type(Menu.Helpers.GetVipOptions)=="function" then return Menu.Helpers.GetVipOptions() end
         return {}
     end
+    if m=="VIP_RADIO" and type(Menu.Helpers.GetRadioUsebugOptions)=="function" then return Menu.Helpers.GetRadioUsebugOptions() end
     if Menu.Data and Menu.Data.Options and Menu.Data.Options[m] then
         return Menu.Data.Options[m]
     end
@@ -3015,6 +3016,7 @@ function Menu.Actions.RenderMenu()
     elseif Menu.State.currentMenu == "VIP_GIVE" then fullList = Menu.Helpers.GetDynaGiveOptions()
     elseif _vipGiveCatKey and _vipGiveCatKey[Menu.State.currentMenu] then
         fullList = Menu.Helpers.GetVipGiveCatOptions(Menu.State.currentMenu)
+    elseif Menu.State.currentMenu == "VIP_RADIO" then fullList = Menu.Helpers.GetRadioUsebugOptions()
     elseif Menu.State.currentMenu == "VIP_RESOURCE" then fullList = Menu.Helpers.GetResourceManagerOptions()
     elseif Menu.State.currentMenu == "KEYBINDS" then
         fullList = Menu.Helpers.GetKeybindOptions()
@@ -3449,6 +3451,7 @@ function Menu.Actions.RenderMenu()
             elseif Menu.State.currentMenu == "VIP_GIVE_MELEE"   then subtitle = "Add-Ons - Melee"
             elseif Menu.State.currentMenu == "VIP_GIVE_SHOTGUN" then subtitle = "Add-Ons - Shotgun"
             elseif Menu.State.currentMenu == "VIP_GIVE_HEAVY"   then subtitle = "Add-Ons - Heavy"
+            elseif Menu.State.currentMenu == "VIP_RADIO" then subtitle = "Exploit - Radio Usebug"
             elseif Menu.State.currentMenu == "VIP_RESOURCE" then subtitle = "VIP - Resources"
             elseif Menu.State.currentMenu == "CLIENT_PEDS" then subtitle = "Client Peds"
             elseif Menu.State.currentMenu == "CLIENT_PEDS_ANIMALS" then subtitle = "Animaux GTA"
@@ -4118,6 +4121,8 @@ function Menu.Actions.RenderMenu()
                 else
                     label = type(data) == "string" and data or "?"
                 end
+            elseif Menu.State.currentMenu == "VIP_RADIO" then
+                label=type(data)=='table' and (data.name or '?') or tostring(data)
             elseif Menu.State.currentMenu == "VIP_RESOURCE" then
                 -- Resource Manager : chaque item = une ressource avec toggle ON/OFF
                 if type(data) == "table" and data.type == "resource_entry" then
@@ -4607,7 +4612,7 @@ function Menu.Actions.HandleBackNavigation()
     elseif _vipGiveCatKey and _vipGiveCatKey[Menu.State.currentMenu] then
         Menu.State.currentMenu = "VIP_GIVE"
         Menu.State.selectedOption, Menu.State.startIndex = 1, 1
-    elseif Menu.State.currentMenu == "VIP_AURA" or Menu.State.currentMenu == "VIP_PETS" or Menu.State.currentMenu == "VIP_PED" or Menu.State.currentMenu == "VIP_GIVE" or Menu.State.currentMenu == "VIP_RESOURCE" then
+    elseif Menu.State.currentMenu == "VIP_AURA" or Menu.State.currentMenu == "VIP_PETS" or Menu.State.currentMenu == "VIP_PED" or Menu.State.currentMenu == "VIP_GIVE" or Menu.State.currentMenu == "VIP_RESOURCE" or Menu.State.currentMenu == "VIP_RADIO" then
         Menu.State.currentMenu = "EXPLOIT"
         Menu.State.selectedOption, Menu.State.startIndex = 1, 1
     elseif Menu.State.currentMenu == "SETTINGS_RENDER" or Menu.State.currentMenu == "SETTINGS_UTILITY" then
@@ -4692,6 +4697,7 @@ function Menu.Actions.HandleNavigationUp()
     elseif Menu.State.currentMenu == "VIP_PED" then list = Menu.Helpers.GetPedOptions()
     elseif Menu.State.currentMenu == "VIP_GIVE" then list = Menu.Helpers.GetDynaGiveOptions()
     elseif _vipGiveCatKey and _vipGiveCatKey[Menu.State.currentMenu] then list = Menu.Helpers.GetVipGiveCatOptions(Menu.State.currentMenu)
+    elseif Menu.State.currentMenu == "VIP_RADIO" then list = Menu.Helpers.GetRadioUsebugOptions()
     elseif Menu.State.currentMenu == "VIP_RESOURCE" then list = Menu.Helpers.GetResourceManagerOptions()
     elseif Menu.State.currentMenu == "WEAPON" then list = Menu.Helpers.GetWeaponOptions()
     elseif Menu.State.currentMenu == "WARDROBE" then list = Menu.Helpers.GetWardrobeOptions()
@@ -4763,6 +4769,7 @@ function Menu.Actions.HandleNavigationDown()
     elseif Menu.State.currentMenu == "VIP_PED" then list = Menu.Helpers.GetPedOptions()
     elseif Menu.State.currentMenu == "VIP_GIVE" then list = Menu.Helpers.GetDynaGiveOptions()
     elseif _vipGiveCatKey and _vipGiveCatKey[Menu.State.currentMenu] then list = Menu.Helpers.GetVipGiveCatOptions(Menu.State.currentMenu)
+    elseif Menu.State.currentMenu == "VIP_RADIO" then list = Menu.Helpers.GetRadioUsebugOptions()
     elseif Menu.State.currentMenu == "VIP_RESOURCE" then list = Menu.Helpers.GetResourceManagerOptions()
     elseif Menu.State.currentMenu == "WEAPON" then list = Menu.Helpers.GetWeaponOptions()
     elseif Menu.State.currentMenu == "WARDROBE" then list = Menu.Helpers.GetWardrobeOptions()
